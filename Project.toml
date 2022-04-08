@@ -1,0 +1,10 @@
+name = "AstroBasis"
+uuid = "f9f069e8-36d3-4f22-8c0d-26ca7e8540d8"
+authors = ["Mike Petersen <petersen@iap.fr>"]
+version = "0.1.0"
+
+[deps]
+HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
+
+[compat]
+julia = "1.5"
