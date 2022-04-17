@@ -2,13 +2,18 @@
 
 import AstroBasis
 
-UF,DF = AstroBasis.read_and_fill_prefactors(6,20)
+# set up the basis
+rb,G = 1.,1.
+UF,DF = AstroBasis.read_and_fill_prefactors(6,20,rb,G)
 
+# return a single basis function value
 println(AstroBasis.UlnpCB73(1,2,0.1,UF))
 
+# initialise an array for holding the basis values: memory efficient!
 tabUlnp = zeros(20)
+AstroBasis.tabUlnpCB73!(0,0.1,tabUlnp,20,UF,rb)
 
-AstroBasis.tabUlnpCB73!(0,0.1,tabUlnp,20,UF)
+# there could also be a version that returns the array, just as a backup for one-offs.
 
 # run some timing tests
 function eval_time(l::Int64,nr::Int64,

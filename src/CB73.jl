@@ -9,7 +9,7 @@ rb=1
 G =1
 """
 
-"""read_and_fill_prefactors
+"""read_and_fill_prefactors(lmax,nmax[,rb,G,precomputed_filename])
 
 reads a table of pre-computed prefactors for Gegenbauer functions
 comes loaded with a pre-computed large table of prefactors (probably more than you need!)
@@ -42,13 +42,11 @@ function read_and_fill_prefactors(lmax::Int64,nradial::Int64,
         end
     end
 
-    # no return needed for constant definitions
     return tabPrefCB73_Ulnp,tabPrefCB73_Dlnp
 
 end
 
-"""rhoCB73
-
+"""rhoCB73(x)
 Function that returns the parameter -1 <= rho <= 1 for a given dimensionless radius x=r/Rbasis
 """
 function rhoCB73(x::Float64)
@@ -56,40 +54,39 @@ function rhoCB73(x::Float64)
 end
 
 
-"""ClnCB73
-
+"""ClnCB73(alpha,n,rho)
 Definition of the Gegenbauer polynomials
 These coefficients are computed through an upward recurrence
 @IMPROVE compute all the basis elements (n)_{1<=n<=nradial} at once
 """
 function ClnCB73(alpha::Float64,n::Int64,rho::Float64)
-    #####
+
     v0 = 1.0 # Initial value for n=0
     if (n == 0)
         return v0 # No need for a recurrence for n=0
     end
-    #####
+
     v1 = 2.0*alpha*rho # Initial value for n=1
     if (n == 1)
         return v1 # No need for a recurrence for n=1
     end
-    #####
+
     ic = 2 # Iteration counter that gives the index of the value that is about to be computed
     v = 0.0 # Initialisation of the temporary variable
-    #####
+
     while (ic <= n) # Applying the recurrence as many times as needed
         v = (2.0*(ic+alpha-1.0)*rho*v1 - (ic+2.0*alpha-2.0)*v0)/(ic) # Applying the recurrence
         v0, v1 = v1, v # Updating the temporary variables
         ic += 1 # Updating the counter of iteration
     end
-    #####
+
     return v # Output of the value
 end
 
-"""UlnpCB73
+"""UlnpCB73(lharmonic,np,r,prefactor_table[,rb])
 Definition of the potential radial basis elements from Clutton-Brock (1973)
 
-ATTENTION, np index starts at n=1
+Be careful: l=0 is index 1, np=0 is index 1.
 """
 function UlnpCB73(l::Int64,np::Int64,r::Float64,tabPrefCB73_Ulnp::Matrix{Float64},rb::Float64=1.)
     pref = tabPrefCB73_Ulnp[l+1,np] # Value of the prefactor. ATTENTION, l starts at l=0
@@ -102,23 +99,23 @@ function UlnpCB73(l::Int64,np::Int64,r::Float64,tabPrefCB73_Ulnp::Matrix{Float64
 end
 
 
-"""DlnpCB73
+"""DlnpCB73(lharmonic,np,r,prefactor_table[,rb])
 Definition of the density radial basis elements from Clutton-Brock (1973)
 
-ATTENTION, np index starts at n=1
+Be careful: l=0 is index 1, np=0 is index 1.
 """
 function DlnpCB73(l::Int64,np::Int64,r::Float64,tabPrefCB73_Dlnp::Matrix{Float64},rb::Float64=1.)
-    pref = tabPrefCB73_Dlnp[l+1,np] # Value of the prefactor. ATTENTION, l starts at l = 0
-    x    = r/rb # Dimensionless radius
-    rho  = rhoCB73(x) # Value of the rescaled parameter rho
+    pref = tabPrefCB73_Dlnp[l+1,np]                  # Value of the prefactor. ATTENTION, l starts at l = 0
+    x    = r/rb                                      # Dimensionless radius
+    rho  = rhoCB73(x)                                # Value of the rescaled parameter rho
     valR = ((x/(1.0+x^(2)))^(l))/((1.0+x^(2))^(5/2)) # Value of the multipole factor
-    valC = ClnCB73(l+1.0,np-1,rho) # Value of the Gegenbauer polynomials
+    valC = ClnCB73(l+1.0,np-1,rho)                   # Value of the Gegenbauer polynomials
     res  = pref*valR*valC
-    return res # Output
+    return res
 end
 
 
-"""tabUlnpCB73
+"""tabUlnpCB73!(lharmonic,radius,tabUlnp,nradial,prefactor_table[,rb])
 
 Compute CB73 potential table for a given l and r, and for 1 <= np <= nradial, nearly simultaneously
 
@@ -132,8 +129,8 @@ function tabUlnpCB73!(l::Int64,r::Float64,
                       tabPrefCB73_Ulnp::Matrix{Float64},
                       rb::Float64=1.)
 
-    x     = r/rb # Dimensionless radius
-    rho   = rhoCB73(x) # Value of the rescaled parameter rho
+    x     = r/rb                                    # Dimensionless radius
+    rho   = rhoCB73(x)                              # Value of the rescaled parameter rho
     valR  = ((x/(1.0+x^(2)))^(l))/(sqrt(1.0+x^(2))) # Value of the multipole factor
 
     alpha = l+1.0 # Value of alpha, the index of the Gegenbauer polynomials
