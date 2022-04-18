@@ -9,6 +9,9 @@ rb=1
 G =1
 """
 
+# set the data path
+data_path() = abspath(joinpath(@__DIR__, "tables", "data_CB73_lmax_50_nmax_200.h5"))
+
 """read_and_fill_prefactors(lmax,nmax[,rb,G,precomputed_filename])
 
 reads a table of pre-computed prefactors for Gegenbauer functions
@@ -18,7 +21,7 @@ comes loaded with a pre-computed large table of prefactors (probably more than y
 """
 function read_and_fill_prefactors(lmax::Int64,nradial::Int64,
                                   rb::Float64=1.,G::Float64=1.,
-                                  filename::String="src/tables/data_CB73_lmax_50_nmax_200.h5")
+                                  filename::String=data_path())
 
     tabalphaCB73 = h5read(filename,"tab_alphalnp") # Reading the prefactors alpha_lnp
     tabbetaCB73  = h5read(filename,"tab_betalnp")  # Reading the prefactors beta_lnp
