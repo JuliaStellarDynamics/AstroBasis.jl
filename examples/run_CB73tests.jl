@@ -1,4 +1,8 @@
+"""
+AstroBasis Clutton-Brock (1973) test file
 
+@IMPROVE: test cumsum on arrays versus loop for timing
+"""
 
 import AstroBasis
 
@@ -23,7 +27,7 @@ function eval_time(l::Int64,nr::Int64,
                    rb::Float64=1.)
     for x=1:nr
         r = x*0.001
-        AstroBasis.tabUlnpCB73!(0,r,tabUlnp,20,UF)
+        AstroBasis.tabUlnpCB73!(0,r,tabUlnp,20,tabPrefCB73_Ulnp)
     end
 end
 

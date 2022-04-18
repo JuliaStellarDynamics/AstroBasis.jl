@@ -5,7 +5,7 @@
 
 -----------------------------
 
-## Quick activate
+### Quick activate
 
 `AstroBasis` is (currently) unregistered, and as such if you would like to add it to your Julia registry, read [here](https://pkgdocs.julialang.org/v1/managing-packages/#Adding-unregistered-packages). Short version: when in the package manager, `add "git@github.com:michael-petersen/JuliaAstroBasis.git"`. (If you are getting an error about git keys, you will need to register your private key using the julia shell prompt (access with `;`), and then pointing at your private key: `ssh-add ~/.ssh/id_rsa`.)
 
@@ -13,7 +13,7 @@ One may also work directly from the cloned repository. In the main directory whe
 
 -----------------------------
 
-## Clutton-Brock 3d basis functions
+### Clutton-Brock 3d basis functions
 
 `read_and_fill_prefactors(lmax,nmax)` will load prefactors for the Clutton-Brock basis. If you want orders above lmax=50, nmax=200 (unlikely), you will need to recompute the zero tables.
 
@@ -23,12 +23,12 @@ Overloaded function `tabUlnpCB73!(lharmonic,radius,output,nmax,tabUln[,rb])` wil
 
 -----------------------------
 
-## Examples
+### Examples
 
-See `examples/run_CB73tests.jl` for an example script using the Clutton-Brock 3d basis.
+See `examples/run_CB73tests.jl` for an example script using the Clutton-Brock 3d basis and a timing test.
 
 -----------------------------
 
-## Author
+### Author
 
 Mike Petersen -  @michael-petersen - petersen@iap.fr
