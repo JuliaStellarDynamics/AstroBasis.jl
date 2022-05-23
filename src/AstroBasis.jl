@@ -13,6 +13,7 @@ include("CB73.jl")
 # @IMPROVE, add Hernquist basis
 
 # @IMPROVE, add Clutton-Brock (1972) disc basis
+include("CB72.jl")
 
 # @IMPROVE, add Kalnajs (1976) disc basis
 

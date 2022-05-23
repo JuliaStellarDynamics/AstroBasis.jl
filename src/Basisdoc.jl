@@ -1,5 +1,5 @@
 """
-Radial basis creation requisites
+    Radial basis creation requisites
 
 - Structure with the following attributes :
     - name
@@ -26,7 +26,8 @@ Radial basis creation requisites
 """
 
 
-"""fill_prefactors!(basis)
+"""
+    fill_prefactors!(basis)
 
 Fill the density and potential prefactors arrays from 'basis'
 
@@ -37,7 +38,8 @@ function fill_prefactors!(basis)
 end
 
 
-"""getUln(basis,l,n,r)
+"""
+    getUln(basis,l,n,r)
 
 Definition of the potential radial basis elements (l,n) at position r.
 
@@ -48,7 +50,8 @@ function getUln(basis,l,n,r)
 end
 
 
-"""getDln(basis,l,n,r)
+"""
+    getDln(basis,l,n,r)
 
 Definition of the density radial basis elements (l,n) at position r.
 
@@ -59,7 +62,8 @@ function getUln(basis,l,n,r)
 end
 
 
-"""tabUl!(basis,l)
+"""
+    tabUl!(basis,l)
 
 Compute potential table for a given l and r, and for 0 <= n <= nmax
 
@@ -71,7 +75,8 @@ function tabUl!(basis,l,r)
     # ... [implementation sold separately] ...
 end
 
-"""tabDl!(basis,l)
+"""
+    tabDl!(basis,l)
 
 Compute density table for a given l and r, and for 0 <= n <= nmax
 
