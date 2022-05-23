@@ -2,6 +2,9 @@ module AstroBasis
 
 using HDF5
 
+# Documentation of the function needed in a basis
+include("Basisdoc.jl")
+
 # bring in the Clutton-Brock basis
 include("CB73.jl")
 
