@@ -222,15 +222,15 @@ function tabUlnpCB73!(l::Int64,r::Float64,
     v1 = 2.0*alpha*rho # Initial value of the Gegenbauer polynomials for n=1
     tabUlnp[2] = tabPrefCB73_Ulnp[l+1,2]*valR*v1 # Filling in the value for np=2. ATTENTION, l starts at l=0
 
-    for np=3:nmax # Loop over remaining the radial indices
-        v = (2.0*(np+alpha-2.0)*rho*v1 - (np+2.0*alpha-3.0)*v0)/(np-1) # Applying the recurrence
+    for np=2:nmax # Loop over remaining the radial indices
+        v = (2.0*(np+alpha-1.0)*rho*v1 - (np+2.0*alpha-2.0)*v0)/(np) # Applying the recurrence
         v0, v1 = v1, v # Updating the temporary variables
-        tabUlnp[np] = tabPrefCB73_Ulnp[l+1,np]*valR*v # Filling in the value for np. ATTENTION, l starts at l=0
+        tabUlnp[np+1] = tabPrefCB73_Ulnp[l+1,np+1]*valR*v # Filling in the value for np. ATTENTION, l starts at l=0
     end
 end
 
 
-function tabUl(basis::structCB73Basis_type,l::Int64,r::Float64)
+function tabUl!(basis::structCB73Basis_type,l::Int64,r::Float64)
 
     tabUlnpCB73!(l,r,basis.tabUl,basis.nmax,basis.tabPrefU,basis.rb)
     #return UlnpCB73(l,np,r,basis.tabPrefU,basis.rb)
@@ -246,7 +246,7 @@ To avoid repeated memory allocations, this overwrites a table already in the str
 @IMPROVE, create outs for nmax<3?
 """
 function tabDlnpCB73!(l::Int64,r::Float64,
-                      tabUlnp::Array{Float64,1},
+                      tabDlnp::Array{Float64,1},
                       nmax::Int64,
                       tabPrefCB73_Dlnp::Matrix{Float64},
                       rb::Float64=1.)
@@ -264,15 +264,15 @@ function tabDlnpCB73!(l::Int64,r::Float64,
     v1 = 2.0*alpha*rho # Initial value of the Gegenbauer polynomials for n=1
     tabDlnp[2] = tabPrefCB73_Dlnp[l+1,2]*valR*v1 # Filling in the value for np=2. ATTENTION, l starts at l=0
 
-    for np=3:nmax # Loop over remaining the radial indices
-        v = (2.0*(np+alpha-2.0)*rho*v1 - (np+2.0*alpha-3.0)*v0)/(np-1) # Applying the recurrence
+    for np=2:nmax # Loop over remaining the radial indices
+        v = (2.0*(np+alpha-1.0)*rho*v1 - (np+2.0*alpha-1.0)*v0)/(np) # Applying the recurrence
         v0, v1 = v1, v # Updating the temporary variables
-        tabDlnp[np] = tabPrefCB73_Dlnp[l+1,np]*valR*v # Filling in the value for np. ATTENTION, l starts at l=0
+        tabDlnp[np+1] = tabPrefCB73_Dlnp[l+1,np+1]*valR*v # Filling in the value for np. ATTENTION, l starts at l=0
     end
 end
 
 
-function tabUD(basis::structCB73Basis_type,l::Int64,r::Float64)
+function tabDl!(basis::structCB73Basis_type,l::Int64,r::Float64)
 
     tabDlnpCB73!(l,r,basis.tabDl,basis.nmax,basis.tabPrefD,basis.rb)
 end

@@ -11,10 +11,15 @@ rb,G = 1.,1.
 
 CB73 = AstroBasis.CB73Basis_create(lmax=6, nmax=20,G=1., rb=1.)
 AstroBasis.fill_prefactors!(CB73)
+AstroBasis.getUln(CB73,1,2,0.1)
+AstroBasis.tabUl!(CB73,0,0.1)
+println(CB73.tabUl)
 
+AstroBasis.tabDl!(CB73,1,0.1)
 
 # backup options
 UF,DF = AstroBasis.read_and_fill_prefactors(6,20,rb,G)
+
 
 # return a single basis function value
 println(AstroBasis.UlnpCB73(1,2,0.1,UF))
@@ -22,6 +27,7 @@ println(AstroBasis.UlnpCB73(1,2,0.1,UF))
 # initialise an array for holding the basis values: memory efficient!
 tabUlnp = zeros(20)
 AstroBasis.tabUlnpCB73!(0,0.1,tabUlnp,20,UF,rb)
+
 
 # there could also be a version that returns the array, just as a backup for one-offs.
 
