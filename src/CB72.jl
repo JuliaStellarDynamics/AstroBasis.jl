@@ -272,8 +272,8 @@ end
 
 For Clutton-Brock (1972) basis elements, using getUln.
 """
-function tabDln(basis::structCB72Basis_type,
-                    l::Int64,r::Float64)
+function getDln(basis::structCB72Basis_type,
+                    l::Int64,n::Int64,r::Float64)
     #####
     # Compute potential basis elements n-2 and n at azimuthal number l+1 without prefactors
     #####
