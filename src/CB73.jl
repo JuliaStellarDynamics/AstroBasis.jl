@@ -20,20 +20,26 @@ Radial basis elements from Clutton-Brock (1973)
 """
 struct structCB73Basis_type
 
-    name::String        # Basis name (default CB73)
+    name::String         # Basis name (default CB73)
     dimension::Int64     # Basis dimension (default 2)
 
     lmax::Int64         # Maximal harmonic/azimuthal index (starts at 0)
     nmax::Int64         # Maximal radial index (starts at 0)
 
     G::Float64       # Gravitational constant (default 1.0)
-    rb::Float64    # Radial extension (default 1.0)
+    rb::Float64      # Radial extension (default 1.0)
 
     tabPrefU::Array{Float64,2}  # Potential prefactors array
     tabPrefD::Array{Float64,2}  # Density prefactors array
 
     tabUl::Array{Float64,1}     # Potential elements value array
     tabDl::Array{Float64,1}     # Density elements value array
+
+    #tabPrefU::zeros(Float64,lmax+1,nmax+1)  # Potential prefactors array
+    #tabPrefD::zeros(Float64,lmax+1,nmax+1)  # Density prefactors array
+
+    #tabUl::zeros(Float64,nmax+1)     # Potential elements value array
+    #tabDl::zeros(Float64,nmax+1)     # Density elements value array
 
 end
 
@@ -48,7 +54,7 @@ name="CB73", dimension=2,
 lmax=0, nmax=0,
 G=1., rb=1.
 """
-function CB73Basis_create(name::String="CB73", dimension::Int64=3,
+function CB73Basis_create(;name::String="CB73", dimension::Int64=3,
                             lmax::Int64=0, nmax::Int64=0,
                             G::Float64=1., rb::Float64=1.)
 
@@ -62,7 +68,14 @@ end
 
 function fill_prefactors!(basis::structCB73Basis_type,filename::String=data_path())
 
-    basis.tabPrefU,basis.tabPrefD = read_and_fill_prefactors(basis.lmax,basis.nmax,basis.rb,basis.G,filename)
+    tabPrefU,tabPrefD = read_and_fill_prefactors(basis.lmax,basis.nmax,basis.rb,basis.G,filename)
+
+    for l=1:basis.lmax+1
+        for n=1:basis.nmax+1
+            basis.tabPrefU[l,n] = tabPrefU[l,n]
+            basis.tabPrefD[l,n] = tabPrefD[l,n]
+        end
+    end
 
 end
 
@@ -84,19 +97,19 @@ function read_and_fill_prefactors(lmax::Int64,nmax::Int64,
     #return tabalphaCB73,tabbetaCB73
 
     # generate blank tables: set up as constants; may only be computed once per session
-    tabPrefCB73_Ulnp = zeros(Float64,lmax+1,nmax) # Table of the prefactors of the POTENTIAL basis functions, i.e. the Ulnp !! ATTENTION, size is lmax+1 as l=0 exists
-    tabPrefCB73_Dlnp = zeros(Float64,lmax+1,nmax) # Table of the prefactors of the DENSITY   basis functions, i.e. the Dlnp !! ATTENTION, size is lmax+1 as l=0 exists
+    tabPrefCB73_Ulnp = zeros(Float64,lmax+1,nmax+1) # Table of the prefactors of the POTENTIAL basis functions, i.e. the Ulnp !! ATTENTION, size is lmax+1 as l=0 exists
+    tabPrefCB73_Dlnp = zeros(Float64,lmax+1,nmax+1) # Table of the prefactors of the DENSITY   basis functions, i.e. the Dlnp !! ATTENTION, size is lmax+1 as l=0 exists
 
     for l=0:lmax # Loop over the harmonic indices. ATTENTION, harmonic index starts at l=0
-        for np=1:nmax # Loop over the radial basis numbers
-            alpha = tabalphaCB73[l+1,np] # Reading the value of alpha. ATTENTION, l starts at l=0
-            beta  = tabbetaCB73[l+1,np]  # Reading the value of beta.  ATTENTION, l starts at l=0
-            #####
-            A = sqrt(G/rb)*alpha # Value of the prefactor A_n^\ell
+        for n=0:nmax # Loop over the radial basis numbers
+            alpha = tabalphaCB73[l+1,n+1]  # Reading the value of alpha. l,np starts at 0
+            beta  = tabbetaCB73[l+1,n+1]   # Reading the value of beta.  l,np starts at 0
+
+            A = sqrt(G/rb)*alpha            # Value of the prefactor A_n^\ell
             B = 1.0/(sqrt(G)*rb^(5/2))*beta # Value of the prefactor B_n^\ell
-            #####
-            tabPrefCB73_Ulnp[l+1,np] = A # Filling in the array. ATTENTION, l starts at l=0
-            tabPrefCB73_Dlnp[l+1,np] = B # Filling in the array. ATTENTION, l starts at l=0
+
+            tabPrefCB73_Ulnp[l+1,n+1] = A  # Filling in the array. l,np starts at 0
+            tabPrefCB73_Dlnp[l+1,n+1] = B  # Filling in the array. l,np starts at 0
         end
     end
 
@@ -147,13 +160,13 @@ Definition of the potential radial basis elements from Clutton-Brock (1973)
 Be careful: l=0 is index 1, np=0 is index 1.
 """
 function UlnpCB73(l::Int64,np::Int64,r::Float64,tabPrefCB73_Ulnp::Matrix{Float64},rb::Float64=1.)
-    pref = tabPrefCB73_Ulnp[l+1,np] # Value of the prefactor. ATTENTION, l starts at l=0
-    x    = r/rb # Dimensionless radius
-    rho  = rhoCB73(x) # Value of the rescaled parameter rho
+    pref = tabPrefCB73_Ulnp[l+1,np+1]              # Value of the prefactor. l,np start l=0
+    x    = r/rb                                    # Dimensionless radius
+    rho  = rhoCB73(x)                              # Value of the rescaled parameter rho
     valR = ((x/(1.0+x^(2)))^(l))/(sqrt(1.0+x^(2))) # Value of the multipole factor
-    valC = ClnCB73(l+1.0,np-1,rho) # Value of the Gegenbauer polynomials
-    res  = pref*valR*valC # Value of the radial function
-    return res # Output
+    valC = ClnCB73(l+1.0,np-1,rho)                 # Value of the Gegenbauer polynomials
+    res  = pref*valR*valC                          # Value of the radial function
+    return res
 end
 
 function getUln(basis::structCB73Basis_type,l::Int64,np::Int64,r::Float64)
@@ -167,7 +180,7 @@ Definition of the density radial basis elements from Clutton-Brock (1973)
 Be careful: l=0 is index 1, np=0 is index 1.
 """
 function DlnpCB73(l::Int64,np::Int64,r::Float64,tabPrefCB73_Dlnp::Matrix{Float64},rb::Float64=1.)
-    pref = tabPrefCB73_Dlnp[l+1,np]                  # Value of the prefactor. ATTENTION, l starts at l = 0
+    pref = tabPrefCB73_Dlnp[l+1,np+1]                # Value of the prefactor. ATTENTION, l starts at l = 0
     x    = r/rb                                      # Dimensionless radius
     rho  = rhoCB73(x)                                # Value of the rescaled parameter rho
     valR = ((x/(1.0+x^(2)))^(l))/((1.0+x^(2))^(5/2)) # Value of the multipole factor

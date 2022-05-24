@@ -57,7 +57,7 @@ Definition of the density radial basis elements (l,n) at position r.
 
 @WARNING:: l=0 is index 1, n=0 is index 1.
 """
-function getUln(basis,l,n,r)
+function getDln(basis,l,n,r)
     # ... [implementation sold separately] ...
 end
 

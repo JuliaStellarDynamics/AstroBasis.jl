@@ -8,6 +8,12 @@ import AstroBasis
 
 # set up the basis
 rb,G = 1.,1.
+
+CB73 = AstroBasis.CB73Basis_create(lmax=6, nmax=20,G=1., rb=1.)
+AstroBasis.fill_prefactors!(CB73)
+
+
+# backup options
 UF,DF = AstroBasis.read_and_fill_prefactors(6,20,rb,G)
 
 # return a single basis function value
