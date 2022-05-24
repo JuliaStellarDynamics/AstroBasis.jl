@@ -4,7 +4,7 @@ Radial basis elements from Clutton-Brock (1972)
 @WARNING: Basis adapted to razor-thin discs, not spherical systems.
 To use with azimuthal elements e^{i l phi} (not spherical harmonics).
 
-@WARNING: Index starts at n=0. We therefore define nmax = nradial-1 the maximal 
+@WARNING: Index starts at n=0. We therefore define nmax = nradial-1 the maximal
 radial index (as lmax for azimuthal/harmonic index l).
 
 @IMPROVE make rb only need to be set in one spot?
@@ -43,7 +43,7 @@ end
 
 Create a structCB72Basis_type structure
 
-By default, 
+By default,
 name="CB72", dimension=2,
 lmax=0, nmax=0,
 G=1., rb=1.
@@ -51,7 +51,7 @@ G=1., rb=1.
 function CB72Basis_create(name::String="CB72", dimension::Int64=2,
                             lmax::Int64=0, nmax::Int64=0,
                             G::Float64=1., rb::Float64=1.)
-    return structMultipole_type(name,dimension, 
+    return structMultipole_type(name,dimension,
                                 lmax,nmax,
                                 G,rb,
                                 zeros(Float64,lmax+1,nmax+1),zeros(Float64,lmax+1,nmax+1), # Prefactors arrays
@@ -60,7 +60,7 @@ end
 
 
 ##################################################
-# Computation of the prefactors 
+# Computation of the prefactors
 ##################################################
 """
     prefactors_recurrence_l_CB72(previous, l, n)
@@ -99,14 +99,14 @@ function fill_prefactors!(basis::structCB72Basis_type)
     for n=0:nmax # Loop over the radial basis numbers. ATTENTION, index starts at n=0
         tabPrefU[1,n+1] = sqrt(2.0) * dimU
         tabPrefD[1,n+1] = sqrt(2.0) * dimD
-    end 
+    end
     # Recurrence
     for n=0:nmax # Loop over the radial basis numbers. ATTENTION, index starts at n=0
         for l=1:lmax # Loop over the harmonic indices. ATTENTION, harmonic index starts at l=0 (here 0 has been initialized)
             tabPrefU[l+1,n+1] = prefactors_recurrence_l_CB72(tabPrefU[l,n+1],l,n)
             tabPrefD[l+1,n+1] = prefactors_recurrence_l_CB72(tabPrefD[l,n+1],l,n)
         end
-    end 
+    end
 
 end
 
@@ -133,7 +133,7 @@ xi^0_l(x) = prod(2k - 1, k=1 -> l) / [  (1 + x^2)^{l + 1/2}   ].
 """
 function U_init_l_CB72(x::Float64,
                         l::Int64)
-    return prod(1:2:(2*l-1)) / (sqrt(1.0 + x*x) * (1.0 + x*x)^(l)) 
+    return prod(1:2:(2*l-1)) / (sqrt(1.0 + x*x) * (1.0 + x*x)^(l))
 end
 
 """
@@ -145,7 +145,7 @@ xi^n_l(x), given the 2 previous ones, xi^{n-1}_l(x) and xi^{n-2}_l(x).
 Initializing the recurrence at xi^0_l given by the initialization from U_init_l_CB72,
 one get the right next adimensional potential basis element from Clutton-Brock (1972).
 """
-function U_recurrence_n_CB72(u0::Float64, u1::Float64, 
+function U_recurrence_n_CB72(u0::Float64, u1::Float64,
                                 rho::Float64,
                                 l::Int64, n::Int64)
     return ( 2.0 + ((2.0*l-1.0)/n) ) * rho * u1 - ( 1.0 + ((2.0*l-1.0)/n) ) * u0
@@ -241,12 +241,12 @@ For Clutton-Brock (1972) basis elements, using tabUl!.
 function tabDl!(basis::structCB72Basis_type,
                     l::Int64,r::Float64)
     #####
-    # Compute potential basis elements at azimuthal number l+1 without prefactors 
+    # Compute potential basis elements at azimuthal number l+1 without prefactors
     # Stored in tabD
     #####
-    tabUl!(basis,l+1,r,true) 
+    tabUl!(basis,l+1,r,true)
     #####
-    # Deduce density basis elements at azimuthal number l without prefactors 
+    # Deduce density basis elements at azimuthal number l without prefactors
     #####
     nmax        = basis.nmax
     rb          = basis.rb
@@ -258,7 +258,7 @@ function tabDl!(basis::structCB72Basis_type,
     end
 
     #####
-    # Adding prefactors 
+    # Adding prefactors
     #####
     x   = r/rb        # Dimensionless radius
     xl  = x^(l)
@@ -272,18 +272,18 @@ end
 
 For Clutton-Brock (1972) basis elements, using getUln.
 """
-function tabDl!(basis::structCB72Basis_type,
+function tabDln(basis::structCB72Basis_type,
                     l::Int64,r::Float64)
     #####
-    # Compute potential basis elements n-2 and n at azimuthal number l+1 without prefactors 
+    # Compute potential basis elements n-2 and n at azimuthal number l+1 without prefactors
     #####
     u0, u2 = getUln(basis,l+1,n-2,r,true), getUln(basis,l+1,n,r,true)
     #####
-    # # Deduce density basis elements at azimuthal number l without prefactors 
+    # # Deduce density basis elements at azimuthal number l without prefactors
     #####
-    Dln = u2 - u0 
+    Dln = u2 - u0
     #####
-    # Adding prefactors 
+    # Adding prefactors
     #####
     rb          = basis.rb
     tabPrefD    = basis.tabPrefD

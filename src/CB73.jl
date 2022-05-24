@@ -12,6 +12,61 @@ G =1
 # set the data path
 data_path() = abspath(joinpath(@__DIR__, "tables", "data_CB73_lmax_50_nmax_200.h5"))
 
+
+"""
+    structCB73Basis_type
+
+Radial basis elements from Clutton-Brock (1973)
+"""
+struct structCB73Basis_type
+
+    name::String        # Basis name (default CB73)
+    dimension::Int64     # Basis dimension (default 2)
+
+    lmax::Int64         # Maximal harmonic/azimuthal index (starts at 0)
+    nmax::Int64         # Maximal radial index (starts at 0)
+
+    G::Float64       # Gravitational constant (default 1.0)
+    rb::Float64    # Radial extension (default 1.0)
+
+    tabPrefU::Array{Float64,2}  # Potential prefactors array
+    tabPrefD::Array{Float64,2}  # Density prefactors array
+
+    tabUl::Array{Float64,1}     # Potential elements value array
+    tabDl::Array{Float64,1}     # Density elements value array
+
+end
+
+
+"""
+    CB73Basis_create([name, dimension, lmax, nmax, G, rb])
+
+Create a structCB73Basis_type structure
+
+By default,
+name="CB73", dimension=2,
+lmax=0, nmax=0,
+G=1., rb=1.
+"""
+function CB73Basis_create(name::String="CB73", dimension::Int64=3,
+                            lmax::Int64=0, nmax::Int64=0,
+                            G::Float64=1., rb::Float64=1.)
+
+    return structCB73Basis_type(name,dimension,
+                                lmax,nmax,
+                                G,rb,
+                                zeros(Float64,lmax+1,nmax+1),zeros(Float64,lmax+1,nmax+1), # Prefactors arrays
+                                zeros(Int64,nmax+1),zeros(Float64,nmax+1)) # Elements value arrays
+end
+
+
+function fill_prefactors!(basis::structCB73Basis_type,filename::String=data_path())
+
+    basis.tabPrefU,basis.tabPrefD = read_and_fill_prefactors(basis.lmax,basis.nmax,basis.rb,basis.G,filename)
+
+end
+
+
 """read_and_fill_prefactors(lmax,nmax[,rb,G,precomputed_filename])
 
 reads a table of pre-computed prefactors for Gegenbauer functions
@@ -19,7 +74,7 @@ comes loaded with a pre-computed large table of prefactors (probably more than y
 
 @WARNING: this may only be run once per session, as it will create constants.
 """
-function read_and_fill_prefactors(lmax::Int64,nradial::Int64,
+function read_and_fill_prefactors(lmax::Int64,nmax::Int64,
                                   rb::Float64=1.,G::Float64=1.,
                                   filename::String=data_path())
 
@@ -29,11 +84,11 @@ function read_and_fill_prefactors(lmax::Int64,nradial::Int64,
     #return tabalphaCB73,tabbetaCB73
 
     # generate blank tables: set up as constants; may only be computed once per session
-    tabPrefCB73_Ulnp = zeros(Float64,lmax+1,nradial) # Table of the prefactors of the POTENTIAL basis functions, i.e. the Ulnp !! ATTENTION, size is lmax+1 as l=0 exists
-    tabPrefCB73_Dlnp = zeros(Float64,lmax+1,nradial) # Table of the prefactors of the DENSITY   basis functions, i.e. the Dlnp !! ATTENTION, size is lmax+1 as l=0 exists
+    tabPrefCB73_Ulnp = zeros(Float64,lmax+1,nmax) # Table of the prefactors of the POTENTIAL basis functions, i.e. the Ulnp !! ATTENTION, size is lmax+1 as l=0 exists
+    tabPrefCB73_Dlnp = zeros(Float64,lmax+1,nmax) # Table of the prefactors of the DENSITY   basis functions, i.e. the Dlnp !! ATTENTION, size is lmax+1 as l=0 exists
 
     for l=0:lmax # Loop over the harmonic indices. ATTENTION, harmonic index starts at l=0
-        for np=1:nradial # Loop over the radial basis numbers
+        for np=1:nmax # Loop over the radial basis numbers
             alpha = tabalphaCB73[l+1,np] # Reading the value of alpha. ATTENTION, l starts at l=0
             beta  = tabbetaCB73[l+1,np]  # Reading the value of beta.  ATTENTION, l starts at l=0
             #####
@@ -60,7 +115,7 @@ end
 """ClnCB73(alpha,n,rho)
 Definition of the Gegenbauer polynomials
 These coefficients are computed through an upward recurrence
-@IMPROVE compute all the basis elements (n)_{1<=n<=nradial} at once
+@IMPROVE compute all the basis elements (n)_{1<=n<=nmax} at once
 """
 function ClnCB73(alpha::Float64,n::Int64,rho::Float64)
 
@@ -101,6 +156,10 @@ function UlnpCB73(l::Int64,np::Int64,r::Float64,tabPrefCB73_Ulnp::Matrix{Float64
     return res # Output
 end
 
+function getUln(basis::structCB73Basis_type,l::Int64,np::Int64,r::Float64)
+    return UlnpCB73(l,np,r,basis.tabPrefU,basis.rb)
+end
+
 
 """DlnpCB73(lharmonic,np,r,prefactor_table[,rb])
 Definition of the density radial basis elements from Clutton-Brock (1973)
@@ -118,17 +177,22 @@ function DlnpCB73(l::Int64,np::Int64,r::Float64,tabPrefCB73_Dlnp::Matrix{Float64
 end
 
 
-"""tabUlnpCB73!(lharmonic,radius,tabUlnp,nradial,prefactor_table[,rb])
+function getDln(basis::structCB73Basis_type,l::Int64,np::Int64,r::Float64)
+    return DlnpCB73(l,np,r,basis.tabPrefD,basis.rb)
+end
 
-Compute CB73 potential table for a given l and r, and for 1 <= np <= nradial, nearly simultaneously
 
-To avoid repeated memory allocations, this overwrites a passed table
+"""tabUlnpCB73!(lharmonic,radius,tabUlnp,nmax,prefactor_table[,rb])
 
-@IMPROVE, create outs for nradial<3
+Compute CB73 potential table for a given l and r, and for 1 <= np <= nmax, nearly simultaneously
+
+To avoid repeated memory allocations, this overwrites a table already in the struct.
+
+@IMPROVE, create outs for nmax<3?
 """
 function tabUlnpCB73!(l::Int64,r::Float64,
                       tabUlnp::Array{Float64,1},
-                      nradial::Int64,
+                      nmax::Int64,
                       tabPrefCB73_Ulnp::Matrix{Float64},
                       rb::Float64=1.)
 
@@ -145,9 +209,57 @@ function tabUlnpCB73!(l::Int64,r::Float64,
     v1 = 2.0*alpha*rho # Initial value of the Gegenbauer polynomials for n=1
     tabUlnp[2] = tabPrefCB73_Ulnp[l+1,2]*valR*v1 # Filling in the value for np=2. ATTENTION, l starts at l=0
 
-    for np=3:nradial # Loop over remaining the radial indices
+    for np=3:nmax # Loop over remaining the radial indices
         v = (2.0*(np+alpha-2.0)*rho*v1 - (np+2.0*alpha-3.0)*v0)/(np-1) # Applying the recurrence
         v0, v1 = v1, v # Updating the temporary variables
         tabUlnp[np] = tabPrefCB73_Ulnp[l+1,np]*valR*v # Filling in the value for np. ATTENTION, l starts at l=0
     end
+end
+
+
+function tabUl(basis::structCB73Basis_type,l::Int64,r::Float64)
+
+    tabUlnpCB73!(l,r,basis.tabUl,basis.nmax,basis.tabPrefU,basis.rb)
+    #return UlnpCB73(l,np,r,basis.tabPrefU,basis.rb)
+end
+
+
+"""tabDlnpCB73!(lharmonic,radius,tabD,nmax,prefactor_table[,rb])
+
+Compute CB73 density table for a given l and r, and for 1 <= np <= nmax, nearly simultaneously
+
+To avoid repeated memory allocations, this overwrites a table already in the struct.
+
+@IMPROVE, create outs for nmax<3?
+"""
+function tabDlnpCB73!(l::Int64,r::Float64,
+                      tabUlnp::Array{Float64,1},
+                      nmax::Int64,
+                      tabPrefCB73_Dlnp::Matrix{Float64},
+                      rb::Float64=1.)
+
+    x     = r/rb                                      # Dimensionless radius
+    rho   = rhoCB73(x)                                # Value of the rescaled parameter rho
+    valR  = ((x/(1.0+x^(2)))^(l))/((1.0+x^(2))^(5/2)) # Value of the multipole factor
+
+    alpha = l+1.0 # Value of alpha, the index of the Gegenbauer polynomials
+
+    # set initial values for recurrence
+    v0 = 1.0           # Initial value of the Gegenbauer polynomials for n=0
+    tabDlnp[1] = tabPrefCB73_Dlnp[l+1,1]*valR*v0 # Filling in the value for np=1. ATTENTION, l starts at l=0
+
+    v1 = 2.0*alpha*rho # Initial value of the Gegenbauer polynomials for n=1
+    tabDlnp[2] = tabPrefCB73_Dlnp[l+1,2]*valR*v1 # Filling in the value for np=2. ATTENTION, l starts at l=0
+
+    for np=3:nmax # Loop over remaining the radial indices
+        v = (2.0*(np+alpha-2.0)*rho*v1 - (np+2.0*alpha-3.0)*v0)/(np-1) # Applying the recurrence
+        v0, v1 = v1, v # Updating the temporary variables
+        tabDlnp[np] = tabPrefCB73_Dlnp[l+1,np]*valR*v # Filling in the value for np. ATTENTION, l starts at l=0
+    end
+end
+
+
+function tabUD(basis::structCB73Basis_type,l::Int64,r::Float64)
+
+    tabDlnpCB73!(l,r,basis.tabDl,basis.nmax,basis.tabPrefD,basis.rb)
 end
