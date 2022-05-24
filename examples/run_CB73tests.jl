@@ -1,7 +1,10 @@
 """
 AstroBasis Clutton-Brock (1973) test file
 
-@IMPROVE: test cumsum on arrays versus loop for timing
+@ATTENTION: to check pre-n-shift values, try
+git checkout 2cbfb7d8d1bbe9c570331a282bf161297e7d37cd
+
+
 """
 
 import AstroBasis
@@ -11,36 +14,20 @@ rb,G = 1.,1.
 
 CB73 = AstroBasis.CB73Basis_create(lmax=6, nmax=20,G=1., rb=1.)
 AstroBasis.fill_prefactors!(CB73)
-AstroBasis.getUln(CB73,1,2,0.1)
+AstroBasis.getUln(CB73,1,1,0.1)
+
+
 AstroBasis.tabUl!(CB73,0,0.1)
 println(CB73.tabUl)
 
-AstroBasis.tabDl!(CB73,1,0.1)
-
-# backup options
-UF,DF = AstroBasis.read_and_fill_prefactors(6,20,rb,G)
-
-
-# return a single basis function value
-println(AstroBasis.UlnpCB73(1,2,0.1,UF))
-
-# initialise an array for holding the basis values: memory efficient!
-tabUlnp = zeros(20)
-AstroBasis.tabUlnpCB73!(0,0.1,tabUlnp,20,UF,rb)
-
-
-# there could also be a version that returns the array, just as a backup for one-offs.
+AstroBasis.tabDl!(CB73,0,0.1)
 
 # run some timing tests
-function eval_time(l::Int64,nr::Int64,
-                   tabUlnp::Array{Float64,1},
-                   nradial::Int64,
-                   tabPrefCB73_Ulnp::Matrix{Float64},
-                   rb::Float64=1.)
+function eval_time(l::Int64,nr::Int64,basis::AstroBasis.structCB73Basis_type)
     for x=1:nr
         r = x*0.001
-        AstroBasis.tabUlnpCB73!(0,r,tabUlnp,20,tabPrefCB73_Ulnp)
+        AstroBasis.tabUl!(basis,0,0.1)
     end
 end
 
-@time eval_time(0,1000,tabUlnp,20,UF)
+@time eval_time(0,1000,CB73)

@@ -61,8 +61,8 @@ function CB73Basis_create(;name::String="CB73", dimension::Int64=3,
     return structCB73Basis_type(name,dimension,
                                 lmax,nmax,
                                 G,rb,
-                                zeros(Float64,lmax+1,nmax+1),zeros(Float64,lmax+1,nmax+1), # Prefactors arrays
-                                zeros(Int64,nmax+1),zeros(Float64,nmax+1)) # Elements value arrays
+                                zeros(Float64,lmax+1,nmax),zeros(Float64,lmax+1,nmax), # Prefactors arrays
+                                zeros(Int64,nmax),zeros(Float64,nmax)) # Elements value arrays
 end
 
 
@@ -71,7 +71,7 @@ function fill_prefactors!(basis::structCB73Basis_type,filename::String=data_path
     tabPrefU,tabPrefD = read_and_fill_prefactors(basis.lmax,basis.nmax,basis.rb,basis.G,filename)
 
     for l=1:basis.lmax+1
-        for n=1:basis.nmax+1
+        for n=1:basis.nmax
             basis.tabPrefU[l,n] = tabPrefU[l,n]
             basis.tabPrefD[l,n] = tabPrefD[l,n]
         end
@@ -97,11 +97,11 @@ function read_and_fill_prefactors(lmax::Int64,nmax::Int64,
     #return tabalphaCB73,tabbetaCB73
 
     # generate blank tables: set up as constants; may only be computed once per session
-    tabPrefCB73_Ulnp = zeros(Float64,lmax+1,nmax+1) # Table of the prefactors of the POTENTIAL basis functions, i.e. the Ulnp !! ATTENTION, size is lmax+1 as l=0 exists
-    tabPrefCB73_Dlnp = zeros(Float64,lmax+1,nmax+1) # Table of the prefactors of the DENSITY   basis functions, i.e. the Dlnp !! ATTENTION, size is lmax+1 as l=0 exists
+    tabPrefCB73_Ulnp = zeros(Float64,lmax+1,nmax) # Table of the prefactors of the POTENTIAL basis functions, i.e. the Ulnp !! ATTENTION, size is lmax+1 as l=0 exists
+    tabPrefCB73_Dlnp = zeros(Float64,lmax+1,nmax) # Table of the prefactors of the DENSITY   basis functions, i.e. the Dlnp !! ATTENTION, size is lmax+1 as l=0 exists
 
     for l=0:lmax # Loop over the harmonic indices. ATTENTION, harmonic index starts at l=0
-        for n=0:nmax # Loop over the radial basis numbers
+        for n=0:nmax-1 # Loop over the radial basis numbers
             alpha = tabalphaCB73[l+1,n+1]  # Reading the value of alpha. l,np starts at 0
             beta  = tabbetaCB73[l+1,n+1]   # Reading the value of beta.  l,np starts at 0
 
@@ -164,7 +164,7 @@ function UlnpCB73(l::Int64,np::Int64,r::Float64,tabPrefCB73_Ulnp::Matrix{Float64
     x    = r/rb                                    # Dimensionless radius
     rho  = rhoCB73(x)                              # Value of the rescaled parameter rho
     valR = ((x/(1.0+x^(2)))^(l))/(sqrt(1.0+x^(2))) # Value of the multipole factor
-    valC = ClnCB73(l+1.0,np-1,rho)                 # Value of the Gegenbauer polynomials
+    valC = ClnCB73(l+1.0,np,rho)                 # Value of the Gegenbauer polynomials
     res  = pref*valR*valC                          # Value of the radial function
     return res
 end
@@ -184,7 +184,7 @@ function DlnpCB73(l::Int64,np::Int64,r::Float64,tabPrefCB73_Dlnp::Matrix{Float64
     x    = r/rb                                      # Dimensionless radius
     rho  = rhoCB73(x)                                # Value of the rescaled parameter rho
     valR = ((x/(1.0+x^(2)))^(l))/((1.0+x^(2))^(5/2)) # Value of the multipole factor
-    valC = ClnCB73(l+1.0,np-1,rho)                   # Value of the Gegenbauer polynomials
+    valC = ClnCB73(l+1.0,np,rho)                   # Value of the Gegenbauer polynomials
     res  = pref*valR*valC
     return res
 end
@@ -222,7 +222,7 @@ function tabUlnpCB73!(l::Int64,r::Float64,
     v1 = 2.0*alpha*rho # Initial value of the Gegenbauer polynomials for n=1
     tabUlnp[2] = tabPrefCB73_Ulnp[l+1,2]*valR*v1 # Filling in the value for np=2. ATTENTION, l starts at l=0
 
-    for np=2:nmax # Loop over remaining the radial indices
+    for np=2:nmax-1 # Loop over remaining the radial indices
         v = (2.0*(np+alpha-1.0)*rho*v1 - (np+2.0*alpha-2.0)*v0)/(np) # Applying the recurrence
         v0, v1 = v1, v # Updating the temporary variables
         tabUlnp[np+1] = tabPrefCB73_Ulnp[l+1,np+1]*valR*v # Filling in the value for np. ATTENTION, l starts at l=0
@@ -264,7 +264,7 @@ function tabDlnpCB73!(l::Int64,r::Float64,
     v1 = 2.0*alpha*rho # Initial value of the Gegenbauer polynomials for n=1
     tabDlnp[2] = tabPrefCB73_Dlnp[l+1,2]*valR*v1 # Filling in the value for np=2. ATTENTION, l starts at l=0
 
-    for np=2:nmax # Loop over remaining the radial indices
+    for np=2:nmax-1 # Loop over remaining the radial indices
         v = (2.0*(np+alpha-1.0)*rho*v1 - (np+2.0*alpha-1.0)*v0)/(np) # Applying the recurrence
         v0, v1 = v1, v # Updating the temporary variables
         tabDlnp[np+1] = tabPrefCB73_Dlnp[l+1,np+1]*valR*v # Filling in the value for np. ATTENTION, l starts at l=0
