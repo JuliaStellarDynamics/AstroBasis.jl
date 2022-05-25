@@ -2,14 +2,10 @@
 Radial basis elements from Clutton-Brock (1973)
 
 @IMPROVE add backup prefactor calculations for alpha,beta
-@IMPROVE make rb only need to be set in one spot?
 
-By default,
-rb=1
-G =1
 """
 
-# set the data path
+# set the data path for the basis prefactor elements
 data_path() = abspath(joinpath(@__DIR__, "tables", "data_CB73_lmax_50_nmax_200.h5"))
 
 
@@ -34,12 +30,6 @@ struct structCB73Basis_type
 
     tabUl::Array{Float64,1}     # Potential elements value array
     tabDl::Array{Float64,1}     # Density elements value array
-
-    #tabPrefU::zeros(Float64,lmax+1,nmax+1)  # Potential prefactors array
-    #tabPrefD::zeros(Float64,lmax+1,nmax+1)  # Density prefactors array
-
-    #tabUl::zeros(Float64,nmax+1)     # Potential elements value array
-    #tabDl::zeros(Float64,nmax+1)     # Density elements value array
 
 end
 
