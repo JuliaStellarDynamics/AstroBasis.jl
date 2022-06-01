@@ -32,7 +32,7 @@ end
 #isocache = "/Volumes/External1/Isochrone/.slgrid_sph_isochrone"
 
 # set the data path for the basis prefactor elements
-data_path() = abspath(joinpath(@__DIR__, "tables", ".slgrid_sph_isochrone"))
+data_path() = abspath(joinpath(@__DIR__, "tables", "slgrid_sph_isochrone"))
 # rename for isochrone specifically
 
 ##################################################
@@ -110,9 +110,6 @@ end
 ##################################################
 
 
-##################################################
-RTable,XItable,EFtableDEN,EFtablePOT = read_cache(isocache)
-##################################################
 
 
 ##################################################
@@ -136,7 +133,6 @@ function read_cache_header(isocache::String)
     return lmax,nmax,scale,numr,xmin,xmax,dxi
 end
 
-lmax_eof,nmax_eof,scale,numr,xmin,xmax,dxi = read_cache_header(isocache::String)
 ##################################################
 
 
@@ -176,6 +172,12 @@ end
 ##################################################
 
 
+function fill_prefactors!(isocache::String)
+    RTable,XItable,EFtableDEN,EFtablePOT = read_cache(isocache)
+    lmax_eof,nmax_eof,scale,numr,xmin,xmax,dxi = read_cache_header(isocache)
+end
+
+
 
 ##################################################
 # Definition of the radial basis elements
@@ -187,18 +189,18 @@ end
 ##################################################
 function UlnpEOF(l::Int64,np::Int64,r::Float64)
     indx,x1,x2 = specify_index(r_to_xi(r,scale),XItable)
-    (x1*EFtablePOT[l+1,np,indx] + x2*EFtablePOT[l+1,np,indx+1])
+    return (x1*EFtablePOT[l+1,np,indx] + x2*EFtablePOT[l+1,np,indx+1])
 end
 #####
 function DlnpEOF(l::Int64,np::Int64,r::Float64)
     indx,x1,x2 = specify_index(r_to_xi(r,scale),XItable)
-    (x1*EFtableDEN[l+1,np,indx] + x2*EFtableDEN[l+1,np,indx+1])
+    return (x1*EFtableDEN[l+1,np,indx] + x2*EFtableDEN[l+1,np,indx+1])
 end
-##################################################
-# Function that computes the values of Ulnp(r)
+
+"""# Function that computes the values of Ulnp(r)
 # for a given l and r,
 # and for 1 <= np <= nradial
-##################################################
+"""
 function tabUlnpEOF!(l::Int64,r::Float64,
                        tabUlnp::Array{Float64,1})
     #####
