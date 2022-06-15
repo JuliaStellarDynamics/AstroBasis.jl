@@ -19,4 +19,9 @@ include("CB72.jl")
 
 # @IMPROVE, add readers for EXP empirical bases
 
+
+# make a generic Basis data type
+Basis_type = Union{structCB73Basis_type,structCB72Basis_type}
+
+
 end # module
