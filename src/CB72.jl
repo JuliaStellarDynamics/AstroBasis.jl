@@ -48,10 +48,10 @@ name="CB72", dimension=2,
 lmax=0, nmax=0,
 G=1., rb=1.
 """
-function CB72Basis_create(name::String="CB72", dimension::Int64=2,
+function CB72Basis_create(;name::String="CB72", dimension::Int64=2,
                             lmax::Int64=0, nmax::Int64=0,
                             G::Float64=1., rb::Float64=1.)
-    return structMultipole_type(name,dimension,
+    return structCB72Basis_type(name,dimension,
                                 lmax,nmax,
                                 G,rb,
                                 zeros(Float64,lmax+1,nmax+1),zeros(Float64,lmax+1,nmax+1), # Prefactors arrays
