@@ -22,7 +22,7 @@ include("Kalnajs76.jl")
 
 
 # make a generic Basis data type
-Basis_type = Union{structCB73Basis_type,structCB72Basis_type}
+Basis_type = Union{structCB73Basis_type,structCB72Basis_type,structK76Basis_type}
 
 
 end # module
