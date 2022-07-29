@@ -15,7 +15,8 @@ include("CB73.jl")
 # bring in the Clutton-Brock (1972) disc basis
 include("CB72.jl")
 
-# @IMPROVE, add Kalnajs (1976) disc basis
+# bring in the Kalnajs (1976) disc basis
+include("Kalnajs76.jl")
 
 # @IMPROVE, add readers for EXP empirical bases
 
