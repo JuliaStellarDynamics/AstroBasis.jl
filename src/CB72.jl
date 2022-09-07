@@ -205,28 +205,27 @@ function getUln(basis::structCB72Basis_type,
     tabPrefU    = basis.tabPrefU
 
     x   = r/rb        # Dimensionless radius
-    xl  = x^(l)
     rho = rhoCB72(x)  # Value of the rescaled parameter rho
 
     #####
     # Recurrence on adimensional subpart (xi) of the potential basis elements
     #####
     # Initialization
-    u0, u1 = 0.0, U_init_l_CB72(x,l)  # n = -1, 0
+    uprev, uact = 0.0, U_init_l_CB72(x,l)  # n = -1, 0
     # Recurrence loop
     for np=1:n # Loop over the radial basis numbers. ATTENTION, index starts at n=0
-        u2 = U_recurrence_n_CB72(u0,u1,rho,l,np)
-        u0, u1 = u1, u2
+        unext = U_recurrence_n_CB72(uprev,uact,rho,l,np)
+        uprev, uact = uact, unext
     end
 
     #####
     # Multiplying by the appropriate prefactor (except if nopref=true, then return only xi^n_l(x))
     #####
     if !(forD)
-        u2 *= tabPrefU[l+1,n+1] * xl
+        uact *= tabPrefU[l+1,n+1] * x^(l)
     end
 
-    return u2
+    return uact
 end
 
 
