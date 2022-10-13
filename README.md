@@ -29,6 +29,7 @@ See `examples/run_CB73tests.jl` for an example script using the Clutton-Brock 3d
 
 -----------------------------
 
-### Author
+### Authors
 
-Mike Petersen -  @michael-petersen - petersen@iap.fr
+Mike Petersen -  @michael-petersen - michael.petersen@roe.ac.uk, petersen@iap.fr
+Mathieu Roule -  @MathieuRoule = roule@iap.fr
