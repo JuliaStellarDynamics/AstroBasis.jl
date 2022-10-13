@@ -10,7 +10,8 @@ include("CB73.jl")
 
 # @IMPROVE, add Bessel basis
 
-# @IMPROVE, add Hernquist basis
+# bring in the Hernquist & Ostriker (1992) disc basis
+include("Hernquist.jl")
 
 # bring in the Clutton-Brock (1972) disc basis
 include("CB72.jl")
@@ -22,7 +23,7 @@ include("Kalnajs76.jl")
 
 
 # make a generic Basis data type
-Basis_type = Union{structCB73Basis_type,structCB72Basis_type,structK76Basis_type}
+Basis_type = Union{structCB73Basis_type,structHernquistBasis_type,structCB72Basis_type,structK76Basis_type}
 
 
 end # module
