@@ -4,7 +4,7 @@ Radial basis elements from Hernquist & Ostriker (1992)
 """
 
 # set the data path for the basis prefactor elements
-data_path() = abspath(joinpath(@__DIR__, "tables", "data_HO92_lmax_50_nmax_200.h5"))
+data_path_hernquist() = abspath(joinpath(@__DIR__, "tables", "data_HO92_lmax_50_nmax_200.h5"))
 
 
 """
@@ -45,7 +45,7 @@ G=1., rb=1.
 function HernquistBasisCreate(;name::String="Hernquist", dimension::Int64=3,
                             lmax::Int64=0, nmax::Int64=0,
                             G::Float64=1., rb::Float64=1.,
-                            filename::String=data_path())
+                            filename::String=data_path_hernquist())
 
     basis = HernquistBasis(name,dimension,
                                       lmax,nmax,
@@ -61,7 +61,7 @@ end
 
 
 
-function fill_prefactors!(basis::HernquistBasis,filename::String=data_path())
+function fill_prefactors!(basis::HernquistBasis,filename::String=data_path_hernquist())
 
     tabPrefU,tabPrefD = read_and_fill_prefactors(basis.lmax,basis.nmax,basis.rb,basis.G,filename)
 
@@ -83,7 +83,7 @@ comes loaded with a pre-computed large table of prefactors (probably more than y
 """
 function read_and_fill_prefactors(lmax::Int64,nmax::Int64,
                                   rb::Float64=1.,G::Float64=1.,
-                                  filename::String=data_path())
+                                  filename::String=data_path_hernquist())
 
     tabαHernquist = h5read(filename,"tab_alphalnp") # Reading the prefactors α_lnp
     tabβHernquist  = h5read(filename,"tab_betalnp")  # Reading the prefactors beta_lnp

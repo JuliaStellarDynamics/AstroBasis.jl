@@ -6,7 +6,7 @@ Radial basis elements from Clutton-Brock (1973)
 """
 
 # set the data path for the basis prefactor elements
-data_path() = abspath(joinpath(@__DIR__, "tables", "data_CB73_lmax_50_nmax_200.h5"))
+data_path_cb73() = abspath(joinpath(@__DIR__, "tables", "data_CB73_lmax_50_nmax_200.h5"))
 
 
 """
@@ -47,7 +47,7 @@ G=1., rb=1.
 function CB73BasisCreate(;name::String="CB73", dimension::Int64=3,
                             lmax::Int64=0, nmax::Int64=0,
                             G::Float64=1., rb::Float64=1.,
-                            filename::String=data_path())
+                            filename::String=data_path_cb73())
     basis = CB73Basis(name,dimension,
                       lmax,nmax,
                       G,rb,
@@ -60,7 +60,7 @@ function CB73BasisCreate(;name::String="CB73", dimension::Int64=3,
 end
 
 
-function fill_prefactors!(basis::CB73Basis,filename::String=data_path())
+function fill_prefactors!(basis::CB73Basis,filename::String=data_path_cb73())
 
     tabPrefU,tabPrefD = read_and_fill_prefactors(basis.lmax,basis.nmax,basis.rb,basis.G,filename)
 
@@ -83,7 +83,7 @@ comes loaded with a pre-computed large table of prefactors (probably more than y
 """
 function read_and_fill_prefactors(lmax::Int64,nmax::Int64,
                                   rb::Float64=1.,G::Float64=1.,
-                                  filename::String=data_path())
+                                  filename::String=data_path_cb73())
 
     tabalphaCB73 = h5read(filename,"tab_alphalnp") # Reading the prefactors alpha_lnp
     tabbetaCB73  = h5read(filename,"tab_betalnp")  # Reading the prefactors beta_lnp
