@@ -15,11 +15,11 @@ G =1
 """
 
 """
-    structCB72Basis_type
+    CB72Basis
 
 Radial basis elements from Clutton-Brock (1972)
 """
-struct structCB72Basis_type
+struct CB72Basis
 
     name::String        # Basis name (default CB72)
     dimension::Int64     # Basis dimension (default 2)
@@ -41,21 +41,26 @@ end
 """
     CB72Basis_create([name, dimension, lmax, nmax, G, rb])
 
-Create a structCB72Basis_type structure
+Create a CB72Basis structure (and fill prefactors)
 
 By default,
 name="CB72", dimension=2,
 lmax=0, nmax=0,
 G=1., rb=1.
 """
-function CB72Basis_create(;name::String="CB72", dimension::Int64=2,
+function CB72BasisCreate(;name::String="CB72", dimension::Int64=2,
                             lmax::Int64=0, nmax::Int64=0,
                             G::Float64=1., rb::Float64=1.)
-    return structCB72Basis_type(name,dimension,
-                                lmax,nmax,
-                                G,rb,
-                                zeros(Float64,lmax+1,nmax+1),zeros(Float64,lmax+1,nmax+1), # Prefactors arrays
-                                zeros(Int64,nmax+1),zeros(Float64,nmax+1)) # Elements value arrays
+
+    basis = CB72Basis(name,dimension,
+                      lmax,nmax,
+                      G,rb,
+                      zeros(Float64,lmax+1,nmax+1),zeros(Float64,lmax+1,nmax+1), # Prefactors arrays
+                      zeros(Int64,nmax+1),zeros(Float64,nmax+1)) # Elements value arrays
+
+    fill_prefactors!(basis)
+
+    return basis
 end
 
 
@@ -73,13 +78,13 @@ Initializing the recurrence at a^n_0 = sqrt(2), one gets the expected prefactor
 a^n_l = 2^(l+1/2) * sqrt( n! / (n+2l)! ).
 """
 function prefactors_recurrence_l_CB72(previous::Float64,
-                                l::Int64,
-                                n::Int64)
+                                      l::Int64,
+                                      n::Int64)
     return 2.0 * sqrt( 1.0 / ( (n+2.0*l)*(n+2.0*l-1.0) ) ) * previous
 end
 
 """
-    fill_prefactors!(basis::structCB72Basis_type)
+    fill_prefactors!(basis::CB72Basis)
 
 Clutton-Brock (1972) prefactors a^n_l = 2^(l+1/2) * sqrt( n! / (n+2l)! )
 computed through the recurrence relation given by the function
@@ -87,7 +92,7 @@ prefactors_recurrence_l_CB72.
 
 @IMPROVE precompute the a^n_l up to a given limit and save them in a file to read?
 """
-function fill_prefactors!(basis::structCB72Basis_type)
+function fill_prefactors!(basis::CB72Basis)
 
     lmax, nmax  = basis.lmax, basis.nmax
     G, rb       = basis.G, basis.rb
@@ -152,11 +157,11 @@ function U_recurrence_n_CB72(u0::Float64, u1::Float64,
 end
 
 """
-    tabUl!(basis::structCB72Basis_type, l, r[, forD])
+    tabUl!(basis::CB72Basis, l, r[, forD])
 
 For Clutton-Brock (1972) basis elements.
 """
-function tabUl!(basis::structCB72Basis_type,
+function tabUl!(basis::CB72Basis,
                     l::Int64,r::Float64,
                     forD::Bool=false)
 
@@ -193,11 +198,11 @@ function tabUl!(basis::structCB72Basis_type,
 end
 
 """
-    getUln(basis::structCB72Basis_type, l, n, r[, forD])
+    getUln(basis::CB72Basis, l, n, r[, forD])
 
 For Clutton-Brock (1972) basis elements.
 """
-function getUln(basis::structCB72Basis_type,
+function getUln(basis::CB72Basis,
                     l::Int64,n::Int64,r::Float64,
                     forD::Bool=false)
 
@@ -233,11 +238,11 @@ end
 # Computation of the density basis elements
 ##################################################
 """
-    tabDl!(basis::structCB72Basis_type, l, r)
+    tabDl!(basis::CB72Basis, l, r)
 
 For Clutton-Brock (1972) basis elements, using tabUl!.
 """
-function tabDl!(basis::structCB72Basis_type,
+function tabDl!(basis::CB72Basis,
                     l::Int64,r::Float64)
     #####
     # Compute potential basis elements at azimuthal number l+1 without prefactors
@@ -267,11 +272,11 @@ function tabDl!(basis::structCB72Basis_type,
 end
 
 """
-    getDln(basis::structCB72Basis_type, l, n, r)
+    getDln(basis::CB72Basis, l, n, r)
 
 For Clutton-Brock (1972) basis elements, using getUln.
 """
-function getDln(basis::structCB72Basis_type,
+function getDln(basis::CB72Basis,
                     l::Int64,n::Int64,r::Float64)
     #####
     # Compute potential basis elements n-2 and n at azimuthal number l+1 without prefactors

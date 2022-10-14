@@ -18,11 +18,11 @@ using SpecialFunctions
 using Memoize
 
 """
-    structK76Basis_type
+    K76Basis
 
 Radial basis elements from Kalnajs (1976)
 """
-struct structK76Basis_type
+struct K76Basis
 
     name::String        # Basis name (default K76)
     dimension::Int64     # Basis dimension (default 2)
@@ -44,23 +44,28 @@ struct structK76Basis_type
 end
 
 """
-    K76Basis_create([name, dimension, lmax, nmax, G, rb])
+    K76BasisCreate([name, dimension, lmax, nmax, G, rb])
 
-Create a structK76Basis_type structure
+Create a K76Basis structure
 
 By default,
 name="K76", dimension=2,
 lmax=0, nmax=0,kKA=1
 G=1., rb=1.
 """
-function K76Basis_create(;name::String="K76", dimension::Int64=2,
+function K76BasisCreate(;name::String="K76", dimension::Int64=2,
                             lmax::Int64=0, nmax::Int64=0,
                             G::Float64=1., rb::Float64=1., kKA::Int64=1)
-    return structK76Basis_type(name,dimension,
-                                lmax,nmax,
-                                G,rb,kKA,
-                                zeros(Float64,lmax+1,nmax+1),zeros(Float64,lmax+1,nmax+1), # Prefactors arrays
-                                zeros(Int64,nmax+1),zeros(Float64,nmax+1)) # Elements value arrays
+
+    basis = K76Basis(name,dimension,
+                     lmax,nmax,
+                     G,rb,kKA,
+                     zeros(Float64,lmax+1,nmax+1),zeros(Float64,lmax+1,nmax+1), # Prefactors arrays
+                     zeros(Int64,nmax+1),zeros(Float64,nmax+1)) # Elements value arrays
+
+    fill_prefactors!(basis)
+
+    return basis
 end
 
 
@@ -75,11 +80,11 @@ function ScoeffK76(k::Int64,l::Int64,n::Int64)
             sqrt( (2*k+l+2*n+0.5) * gamma(2*k+n+1) * gamma(2*k+l+n+0.5) / (gamma(l+n+0.5) * gamma(n+1)) )
 end
 """
-    fill_prefactors!(basis::structK76Basis_type)
+    fill_prefactors!(basis::K76Basis)
 
 Kalnajs (1976) prefactors
 """
-function fill_prefactors!(basis::structK76Basis_type)
+function fill_prefactors!(basis::K76Basis)
 
     lmax, nmax  = basis.lmax, basis.nmax
     G, rb       = basis.G, basis.rb
@@ -127,11 +132,11 @@ end
 end
 
 """
-    tabUl!(basis::structK76Basis_type, l, r)
+    tabUl!(basis::K76Basis, l, r)
 
 For Kalnajs (1976) basis elements.
 """
-function tabUl!(basis::structK76Basis_type,
+function tabUl!(basis::K76Basis,
                     l::Int64,r::Float64)
 
     nmax        = basis.nmax
@@ -161,11 +166,11 @@ function tabUl!(basis::structK76Basis_type,
 end
 
 """
-    getUln(basis::structK76Basis_type, l, n, r[, forD])
+    getUln(basis::K76Basis, l, n, r[, forD])
 
 For Kalnajs (1976) basis elements.
 """
-function getUln(basis::structK76Basis_type,
+function getUln(basis::K76Basis,
                     l::Int64,n::Int64,r::Float64)
 
     rb          = basis.rb
@@ -200,11 +205,11 @@ end
 end
 
 """
-    tabDl!(basis::structK76Basis_type, l, r)
+    tabDl!(basis::K76Basis, l, r)
 
 For Kalnajs (1976) basis elements.
 """
-function tabDl!(basis::structK76Basis_type,
+function tabDl!(basis::K76Basis,
                     l::Int64,r::Float64)
 
     nmax        = basis.nmax
@@ -231,11 +236,11 @@ function tabDl!(basis::structK76Basis_type,
 end
 
 """
-    getDln(basis::structK76Basis_type, l, n, r)
+    getDln(basis::K76Basis, l, n, r)
 
 For Kalnajs (1976) basis elements.
 """
-function getDln(basis::structK76Basis_type,
+function getDln(basis::K76Basis,
                     l::Int64,n::Int64,r::Float64)
     
     rb          = basis.rb

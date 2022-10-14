@@ -8,11 +8,11 @@ data_path() = abspath(joinpath(@__DIR__, "tables", "data_HO92_lmax_50_nmax_200.h
 
 
 """
-    structHernquistBasis_type
+    HernquistBasis
 
 Radial basis elements from Hernquist & Ostriker (1992)
 """
-struct structHernquistBasis_type
+struct HernquistBasis
 
     name::String         # Basis name (default Hernquist)
     dimension::Int64     # Basis dimension (default 2)
@@ -33,30 +33,35 @@ end
 
 
 """
-    HernquistBasis_create([name, dimension, lmax, nmax, G, rb])
+    HernquistBasisCreate([name, dimension, lmax, nmax, G, rb, filename])
 
-Create a structHernquistBasis_type structure
+Create a HernquistBasis structure (and fill prefactors)
 
 By default,
 name="Hernquist", dimension=2,
 lmax=0, nmax=0,
 G=1., rb=1.
 """
-function HernquistBasis_create(;name::String="Hernquist", dimension::Int64=3,
+function HernquistBasisCreate(;name::String="Hernquist", dimension::Int64=3,
                             lmax::Int64=0, nmax::Int64=0,
-                            G::Float64=1., rb::Float64=1.)
+                            G::Float64=1., rb::Float64=1.,
+                            filename::String=data_path())
 
-    return structHernquistBasis_type(name,dimension,
-                                lmax,nmax,
-                                G,rb,
-                                zeros(Float64,lmax+1,nmax),zeros(Float64,lmax+1,nmax), # Prefactors arrays
-                                zeros(Int64,nmax),zeros(Float64,nmax)) # Elements value arrays
+    basis = HernquistBasis(name,dimension,
+                                      lmax,nmax,
+                                      G,rb,
+                                      zeros(Float64,lmax+1,nmax),zeros(Float64,lmax+1,nmax), # Prefactors arrays
+                                      zeros(Int64,nmax),zeros(Float64,nmax)) # Elements value arrays
+
+    fill_prefactors!(basis,filename)
+
+    return basis
 end
 
 
 
 
-function fill_prefactors!(basis::structHernquistBasis_type,filename::String=data_path())
+function fill_prefactors!(basis::HernquistBasis,filename::String=data_path())
 
     tabPrefU,tabPrefD = read_and_fill_prefactors(basis.lmax,basis.nmax,basis.rb,basis.G,filename)
 
@@ -158,7 +163,7 @@ function UlnpHernquist(l::Int64,np::Int64,r::Float64,tabPrefHernquist_Ulnp::Matr
     return res
 end
 
-function getUln(basis::structHernquistBasis_type,l::Int64,np::Int64,r::Float64)
+function getUln(basis::HernquistBasis,l::Int64,np::Int64,r::Float64)
     return UlnpHernquist(l,np,r,basis.tabPrefU,basis.rb)
 end
 
@@ -179,7 +184,7 @@ function DlnpHernquist(l::Int64,np::Int64,r::Float64,tabPrefHernquist_Dlnp::Matr
 end
 
 
-function getDln(basis::structHernquistBasis_type,l::Int64,np::Int64,r::Float64)
+function getDln(basis::HernquistBasis,l::Int64,np::Int64,r::Float64)
     return DlnpHernquist(l,np,r,basis.tabPrefD,basis.rb)
 end
 
@@ -219,7 +224,7 @@ function tabUlnpHernquist!(l::Int64,r::Float64,
 end
 
 
-function tabUl!(basis::structHernquistBasis_type,l::Int64,r::Float64)
+function tabUl!(basis::HernquistBasis,l::Int64,r::Float64)
 
     tabUlnpHernquist!(l,r,basis.tabUl,basis.nmax,basis.tabPrefU,basis.rb)
     #return UlnpHernquist(l,np,r,basis.tabPrefU,basis.rb)
@@ -261,7 +266,7 @@ function tabDlnpHernquist!(l::Int64,r::Float64,
 end
 
 
-function tabDl!(basis::structHernquistBasis_type,l::Int64,r::Float64)
+function tabDl!(basis::HernquistBasis,l::Int64,r::Float64)
 
     tabDlnpHernquist!(l,r,basis.tabDl,basis.nmax,basis.tabPrefD,basis.rb)
 end

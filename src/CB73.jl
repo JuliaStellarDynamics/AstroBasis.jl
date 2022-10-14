@@ -10,11 +10,11 @@ data_path() = abspath(joinpath(@__DIR__, "tables", "data_CB73_lmax_50_nmax_200.h
 
 
 """
-    structCB73Basis_type
+    CB73Basis
 
 Radial basis elements from Clutton-Brock (1973)
 """
-struct structCB73Basis_type
+struct CB73Basis
 
     name::String         # Basis name (default CB73)
     dimension::Int64     # Basis dimension (default 2)
@@ -35,28 +35,32 @@ end
 
 
 """
-    CB73Basis_create([name, dimension, lmax, nmax, G, rb])
+    CB73BasisCreate([name, dimension, lmax, nmax, G, rb, filename])
 
-Create a structCB73Basis_type structure
+Create a CB73Basis structure (and fill prefactors)
 
 By default,
 name="CB73", dimension=2,
 lmax=0, nmax=0,
 G=1., rb=1.
 """
-function CB73Basis_create(;name::String="CB73", dimension::Int64=3,
+function CB73BasisCreate(;name::String="CB73", dimension::Int64=3,
                             lmax::Int64=0, nmax::Int64=0,
-                            G::Float64=1., rb::Float64=1.)
+                            G::Float64=1., rb::Float64=1.,
+                            filename::String=data_path())
+    basis = CB73Basis(name,dimension,
+                      lmax,nmax,
+                      G,rb,
+                      zeros(Float64,lmax+1,nmax),zeros(Float64,lmax+1,nmax), # Prefactors arrays
+                      zeros(Int64,nmax),zeros(Float64,nmax)) # Elements value arrays
 
-    return structCB73Basis_type(name,dimension,
-                                lmax,nmax,
-                                G,rb,
-                                zeros(Float64,lmax+1,nmax),zeros(Float64,lmax+1,nmax), # Prefactors arrays
-                                zeros(Int64,nmax),zeros(Float64,nmax)) # Elements value arrays
+    fill_prefactors!(basis,filename)
+
+    return basis
 end
 
 
-function fill_prefactors!(basis::structCB73Basis_type,filename::String=data_path())
+function fill_prefactors!(basis::CB73Basis,filename::String=data_path())
 
     tabPrefU,tabPrefD = read_and_fill_prefactors(basis.lmax,basis.nmax,basis.rb,basis.G,filename)
 
@@ -159,7 +163,7 @@ function UlnpCB73(l::Int64,np::Int64,r::Float64,tabPrefCB73_Ulnp::Matrix{Float64
     return res
 end
 
-function getUln(basis::structCB73Basis_type,l::Int64,np::Int64,r::Float64)
+function getUln(basis::CB73Basis,l::Int64,np::Int64,r::Float64)
     return UlnpCB73(l,np,r,basis.tabPrefU,basis.rb)
 end
 
@@ -180,7 +184,7 @@ function DlnpCB73(l::Int64,np::Int64,r::Float64,tabPrefCB73_Dlnp::Matrix{Float64
 end
 
 
-function getDln(basis::structCB73Basis_type,l::Int64,np::Int64,r::Float64)
+function getDln(basis::CB73Basis,l::Int64,np::Int64,r::Float64)
     return DlnpCB73(l,np,r,basis.tabPrefD,basis.rb)
 end
 
@@ -220,7 +224,7 @@ function tabUlnpCB73!(l::Int64,r::Float64,
 end
 
 
-function tabUl!(basis::structCB73Basis_type,l::Int64,r::Float64)
+function tabUl!(basis::CB73Basis,l::Int64,r::Float64)
 
     tabUlnpCB73!(l,r,basis.tabUl,basis.nmax,basis.tabPrefU,basis.rb)
     #return UlnpCB73(l,np,r,basis.tabPrefU,basis.rb)
@@ -262,7 +266,7 @@ function tabDlnpCB73!(l::Int64,r::Float64,
 end
 
 
-function tabDl!(basis::structCB73Basis_type,l::Int64,r::Float64)
+function tabDl!(basis::CB73Basis,l::Int64,r::Float64)
 
     tabDlnpCB73!(l,r,basis.tabDl,basis.nmax,basis.tabPrefD,basis.rb)
 end
