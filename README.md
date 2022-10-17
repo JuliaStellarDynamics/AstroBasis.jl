@@ -7,29 +7,49 @@
 
 ### Quick activate
 
-`AstroBasis` is (currently) unregistered, and as such if you would like to add it to your Julia registry, read [here](https://pkgdocs.julialang.org/v1/managing-packages/#Adding-unregistered-packages). Short version: when in the package manager, `add "git@github.com:michael-petersen/JuliaAstroBasis.git"`. (If you are getting an error about git keys, you will need to register your private key using the julia shell prompt (access with `;`), and then pointing at your private key: `ssh-add ~/.ssh/id_rsa`.)
+`AstroBasis` is (currently) unregistered, and as such if you would like to add it to your Julia registry, read [here](https://pkgdocs.julialang.org/v1/managing-packages/#Adding-unregistered-packages). Shortcut version: after cloning the repository, navigate to the top directory. Start julia (`julia`), then the package manager (`]`), then register the package in development mode (`dev .`).
 
-One may also work directly from the cloned repository. In the main directory where you have placed the repository, enter the Julia environment (`julia`), then the package manager (`]`), then activate (`activate .`). To be extra safe, you can `resolve` to check for updates. Then return to the Julia interpreter (`[backspace]`): you are good to go with the latest version of the package! Import the exports by typing `using AstroBasis` into the Julia interpreter. You may also need to download some packages if you are using a new Julia interpreter: try `using(Pkg);Pkg.instantiate()`. If you want to access specific elements listed below, I recommend `import AstroBasis`.
+Then, in your program, if you want to access specific elements listed below, use `import AstroBasis`.
 
 -----------------------------
 
-### Clutton-Brock 3d basis functions
+### Basis functions
 
-`read_and_fill_prefactors(lmax,nmax)` will load prefactors for the Clutton-Brock basis. If you want orders above lmax=50, nmax=200 (unlikely), you will need to recompute the zero tables.
+`AstroBasis` currently offers four different types of bases.
+#### 3d
+1. Clutton-Brock (1973), which is a match to the Plummer (1911) profile.
+2. Hernquist & Ostriker (1992), which is a match to the Hernquist (1990) profile.
 
-`UlnpCB73(l,n,r,tabUln)` will calculate the Clutton-Brock basis at location r for harmonic order l and radial order n. Requires tabulated potential prefactors, tabUln -- the output of `read_and_fill_prefactors`.
+#### 2d
+1. Clutton-Brock (1972), which is a 2d match to a Plummer profile.
+2. Kalnajs (1976), which is a spiral basis.
 
-Overloaded function `tabUlnpCB73!(lharmonic,radius,output,nmax,tabUln[,rb])` will fill the `output` table with radial values from the Clutton-Brock basis up to nmax.
+-----------------------------
+
+### Common functions
+
+The common functions are detailed in `src/Basisdoc.jl`. Any instantiated basis will result in a structure, with attributes `name`, `dimension`, `lmax`, `nmax`, `rb` (the basis scale), and `G` (the gravitational constant; unity by default). The following functions are also defined:
+
+`getUln(basis,l,n,r)` will calculate the basis potential at location r for harmonic order l and radial order n.
+
+`getDln(basis,l,n,r)` will calculate the basis density at location r for harmonic order l and radial order n.
+
+Overloaded function `tabUl!(basis,l)` will fill the structure attribute `tabUl` table with radial potential values from the basis up to `nmax`.
+
+Overloaded function `tabDl!(basis,l)` will fill the structure attribute `tabUl` table with radial density values from the basis up to `nmax`.
+
+`read_and_fill_prefactors(lmax,nmax)` will load prefactors for the basis. This is called when the basis is instantiated, and is unlikely to be needed to be called externally.
 
 -----------------------------
 
 ### Examples
 
-See `examples/run_CB73tests.jl` for an example script using the Clutton-Brock 3d basis and a timing test.
+See `examples/run_CB73tests.jl` for an example script using the Clutton-Brock 3d basis and a timing test. The example is generic to all bases: one can simply swap the initialiser.
 
 -----------------------------
 
 ### Authors
 
 Mike Petersen -  @michael-petersen - michael.petersen@roe.ac.uk, petersen@iap.fr
-Mathieu Roule -  @MathieuRoule = roule@iap.fr
+
+Mathieu Roule -  @MathieuRoule - roule@iap.fr
