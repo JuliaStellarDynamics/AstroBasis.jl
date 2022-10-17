@@ -21,7 +21,7 @@ println(CB73.tabUl)
 AstroBasis.tabDl!(CB73,0,0.1)
 
 # run some timing tests
-function EvalTime(l::Int64,nr::Int64,basis::AstroBasis.Basis_type)
+function EvalTime(l::Int64,nr::Int64,basis::AstroBasis.BasisType)
     for x=1:nr
         r = x*0.001
         AstroBasis.tabUl!(basis,0,0.1)

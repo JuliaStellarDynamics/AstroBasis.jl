@@ -23,7 +23,7 @@ include("Kalnajs76.jl")
 
 
 # make a generic Basis data type
-Basis_type = Union{CB73Basis,HernquistBasis,CB72Basis,K76Basis}
+BasisType = Union{CB73Basis,HernquistBasis,CB72Basis,K76Basis}
 
 
 end # module
