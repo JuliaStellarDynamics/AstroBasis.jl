@@ -62,7 +62,7 @@ end
 
 function fill_prefactors!(basis::CB73Basis,filename::String=data_path_cb73())
 
-    tabPrefU,tabPrefD = read_and_fill_prefactors(basis.lmax,basis.nmax,basis.rb,basis.G,filename)
+    tabPrefU,tabPrefD = ReadFillCB73Prefactors(basis.lmax,basis.nmax,basis.rb,basis.G,filename)
 
     for l=1:basis.lmax+1
         for n=1:basis.nmax
@@ -74,14 +74,14 @@ function fill_prefactors!(basis::CB73Basis,filename::String=data_path_cb73())
 end
 
 
-"""read_and_fill_prefactors(lmax,nmax[,rb,G,precomputed_filename])
+"""ReadFillCB73Prefactors(lmax,nmax[,rb,G,precomputed_filename])
 
 reads a table of pre-computed prefactors for Gegenbauer functions
 comes loaded with a pre-computed large table of prefactors (probably more than you need!)
 
 @WARNING: this may only be run once per session, as it will create constants.
 """
-function read_and_fill_prefactors(lmax::Int64,nmax::Int64,
+function ReadFillCB73Prefactors(lmax::Int64,nmax::Int64,
                                   rb::Float64=1.,G::Float64=1.,
                                   filename::String=data_path_cb73())
 

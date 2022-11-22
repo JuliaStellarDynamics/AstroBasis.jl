@@ -63,7 +63,7 @@ end
 
 function fill_prefactors!(basis::HernquistBasis,filename::String=data_path_hernquist())
 
-    tabPrefU,tabPrefD = read_and_fill_prefactors(basis.lmax,basis.nmax,basis.rb,basis.G,filename)
+    tabPrefU,tabPrefD = ReadFillHernquistPrefactors(basis.lmax,basis.nmax,basis.rb,basis.G,filename)
 
     for l=1:basis.lmax+1
         for n=1:basis.nmax
@@ -75,13 +75,13 @@ function fill_prefactors!(basis::HernquistBasis,filename::String=data_path_hernq
 end
 
 
-"""read_and_fill_prefactors(lmax,nmax[,rb,G,precomputed_filename])
+"""ReadFillHernquistPrefactors(lmax,nmax[,rb,G,precomputed_filename])
 
 reads a table of pre-computed prefactors for Gegenbauer functions
 comes loaded with a pre-computed large table of prefactors (probably more than you need!)
 
 """
-function read_and_fill_prefactors(lmax::Int64,nmax::Int64,
+function ReadFillHernquistPrefactors(lmax::Int64,nmax::Int64,
                                   rb::Float64=1.,G::Float64=1.,
                                   filename::String=data_path_hernquist())
 
