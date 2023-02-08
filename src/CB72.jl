@@ -55,10 +55,10 @@ function CB72BasisCreate(;name::String="CB72", dimension::Int64=2,
     basis = CB72Basis(name,dimension,
                       lmax,nmax,
                       G,rb,
-                      zeros(Float64,lmax+1,nmax+1),zeros(Float64,lmax+1,nmax+1), # Prefactors arrays
+                      zeros(Float64,nmax+1,lmax+1),zeros(Float64,nmax+1,lmax+1), # Prefactors arrays
                       zeros(Int64,nmax+1),zeros(Float64,nmax+1)) # Elements value arrays
 
-    fill_prefactors!(basis)
+    FillPrefactors!(basis)
 
     return basis
 end
@@ -68,7 +68,7 @@ end
 # Computation of the prefactors
 ##################################################
 """
-    prefactors_recurrence_l_CB72(previous, l, n)
+    PrefactorsAzimuthalRecurrenceCB72(previous, l, n)
 
 Gives the next adimensional prefactor (recurrence over azimuthal number l),
 a^n_l = a^n_{l-1} * 2 * sqrt( 1 / [(n+2l)*(n+2l-1)] ),
@@ -77,14 +77,14 @@ given the previous one (a^n_{l-1}).
 Initializing the recurrence at a^n_0 = sqrt(2), one gets the expected prefactor
 a^n_l = 2^(l+1/2) * sqrt( n! / (n+2l)! ).
 """
-function prefactors_recurrence_l_CB72(previous::Float64,
+function PrefactorsAzimuthalRecurrenceCB72(previous::Float64,
                                       l::Int64,
-                                      n::Int64)
+                                      n::Int64)::Float64
     return 2.0 * sqrt( 1.0 / ( (n+2.0*l)*(n+2.0*l-1.0) ) ) * previous
 end
 
 """
-    fill_prefactors!(basis::CB72Basis)
+    FillPrefactors!(basis::CB72Basis)
 
 Clutton-Brock (1972) prefactors a^n_l = 2^(l+1/2) * sqrt( n! / (n+2l)! )
 computed through the recurrence relation given by the function
@@ -92,7 +92,7 @@ prefactors_recurrence_l_CB72.
 
 @IMPROVE precompute the a^n_l up to a given limit and save them in a file to read?
 """
-function fill_prefactors!(basis::CB72Basis)
+function FillPrefactors!(basis::CB72Basis)
 
     lmax, nmax  = basis.lmax, basis.nmax
     G, rb       = basis.G, basis.rb
@@ -102,14 +102,14 @@ function fill_prefactors!(basis::CB72Basis)
     dimD = 1.0 / ( 2.0*pi*sqrt(G * (rb)^(3)) )  # Density basis element dimensional prefactor
     # Initialization
     for n=0:nmax # Loop over the radial basis numbers. ATTENTION, index starts at n=0
-        tabPrefU[1,n+1] = sqrt(2.0) * dimU
-        tabPrefD[1,n+1] = sqrt(2.0) * dimD
+        tabPrefU[n+1,1] = sqrt(2.0) * dimU
+        tabPrefD[n+1,1] = sqrt(2.0) * dimD
     end
     # Recurrence
     for n=0:nmax # Loop over the radial basis numbers. ATTENTION, index starts at n=0
         for l=1:lmax # Loop over the harmonic indices. ATTENTION, harmonic index starts at l=0 (here 0 has been initialized)
-            tabPrefU[l+1,n+1] = prefactors_recurrence_l_CB72(tabPrefU[l,n+1],l,n)
-            tabPrefD[l+1,n+1] = prefactors_recurrence_l_CB72(tabPrefD[l,n+1],l,n)
+            tabPrefU[n+1,l+1] = PrefactorsAzimuthalRecurrenceCB72(tabPrefU[n+1,l],l,n)
+            tabPrefD[n+1,l+1] = PrefactorsAzimuthalRecurrenceCB72(tabPrefD[n+1,l],l,n)
         end
     end
 
@@ -120,29 +120,29 @@ end
 # Computation of the potential basis elements
 ##################################################
 """
-    rhoCB72(x)
+    ρCB72(x)
 
-returns the parameter -1 <= rho <= 1 for a given dimensionless radius x=r/rb.
+returns the parameter -1 <= ρ <= 1 for a given dimensionless radius x=r/rb.
 """
-function rhoCB72(x::Float64)
+@inline function ρCB72(x::Float64)::Float64
     return (x*x - 1.0)/(x*x + 1.0) # Value of rho
 end
 
 """
-    U_init_l_CB72(x, l)
+    UAzimuthalInitializationCB72(x, l)
 
 Gives the (n=0, l) adimensional potential basis element value at a given position x = r/rb,
 xi^0_l(x) = prod(2k - 1, k=1 -> l) / [  (1 + x^2)^{l + 1/2}   ].
 
 @IMPROVE other function to give the initialization for all l simultaneously through recurrence?
 """
-function U_init_l_CB72(x::Float64,
-                        l::Int64)
+function UAzimuthalInitializationCB72(x::Float64,
+                                              l::Int64)::Float64
     return prod(1:2:(2*l-1)) / (sqrt(1.0 + x*x) * (1.0 + x*x)^(l))
 end
 
 """
-    U_recurrence_n_CB72(u^{n-2}, u^{n-1}, rho(x), l, n)
+    URadialReccurenceCB72(u^{n-2}, u^{n-1}, rho(x), l, n)
 
 Gives the next adimensional potential basis element (recurrence over radial number n),
 xi^n_l(x), given the 2 previous ones, xi^{n-1}_l(x) and xi^{n-2}_l(x).
@@ -150,10 +150,10 @@ xi^n_l(x), given the 2 previous ones, xi^{n-1}_l(x) and xi^{n-2}_l(x).
 Initializing the recurrence at xi^0_l given by the initialization from U_init_l_CB72,
 one get the right next adimensional potential basis element from Clutton-Brock (1972).
 """
-function U_recurrence_n_CB72(u0::Float64, u1::Float64,
-                                rho::Float64,
-                                l::Int64, n::Int64)
-    return ( 2.0 + ((2.0*l-1.0)/n) ) * rho * u1 - ( 1.0 + ((2.0*l-1.0)/n) ) * u0
+function URadialRecurrenceCB72(u0::Float64, u1::Float64,
+                                ρ::Float64,
+                                l::Int64, n::Int64)::Float64
+    return ( 2.0 + ((2.0*l-1.0)/n) ) * ρ * u1 - ( 1.0 + ((2.0*l-1.0)/n) ) * u0
 end
 
 """
@@ -172,17 +172,17 @@ function tabUl!(basis::CB72Basis,
 
     x   = r/rb        # Dimensionless radius
     xl  = x^(l)
-    rho = rhoCB72(x)  # Value of the rescaled parameter rho
+    ρ = ρCB72(x)  # Value of the rescaled parameter rho
 
     #####
     # Recurrence on adimensional subpart (xi) of the potential basis elements
     #####
     # Initialization
-    u0, u1 = 0.0, U_init_l_CB72(x,l)  # n = -1, 0
+    u0, u1 = 0.0, UAzimuthalInitializationCB72(x,l)  # n = -1, 0
     tabl[1] =  u1
     # Recurrence loop
     for n=1:nmax # Loop over the radial basis numbers. ATTENTION, index starts at n=0
-        u2 = U_recurrence_n_CB72(u0,u1,rho,l,n)
+        u2 = URadialRecurrenceCB72(u0,u1,ρ,l,n)
         tabl[n+1] = u2
         u0, u1 = u1, u2
     end
@@ -192,7 +192,7 @@ function tabUl!(basis::CB72Basis,
     #####
     if !(forD)
         for n=0:nmax # Loop over the radial basis numbers. ATTENTION, index starts at n=0
-            tabl[n+1] *= tabPrefU[l+1,n+1] * xl
+            tabl[n+1] *= tabPrefU[n+1,l+1] * xl
         end
     end
 end
@@ -210,16 +210,16 @@ function getUln(basis::CB72Basis,
     tabPrefU    = basis.tabPrefU
 
     x   = r/rb        # Dimensionless radius
-    rho = rhoCB72(x)  # Value of the rescaled parameter rho
+    ρ   = ρCB72(x)  # Value of the rescaled parameter rho
 
     #####
     # Recurrence on adimensional subpart (xi) of the potential basis elements
     #####
     # Initialization
-    uprev, uact = 0.0, U_init_l_CB72(x,l)  # n = -1, 0
+    uprev, uact = 0.0, UAzimuthalInitializationCB72(x,l)  # n = -1, 0
     # Recurrence loop
     for np=1:n # Loop over the radial basis numbers. ATTENTION, index starts at n=0
-        unext = U_recurrence_n_CB72(uprev,uact,rho,l,np)
+        unext = URadialRecurrenceCB72(uprev,uact,ρ,l,np)
         uprev, uact = uact, unext
     end
 
@@ -227,7 +227,7 @@ function getUln(basis::CB72Basis,
     # Multiplying by the appropriate prefactor (except if nopref=true, then return only xi^n_l(x))
     #####
     if !(forD)
-        uact *= tabPrefU[l+1,n+1] * x^(l)
+        uact *= tabPrefU[n+1,l+1] * x^(l)
     end
 
     return uact
@@ -267,7 +267,7 @@ function tabDl!(basis::CB72Basis,
     x   = r/rb        # Dimensionless radius
     xl  = x^(l)
     for n=0:nmax # Loop over the radial basis numbers. ATTENTION, index starts at n=0
-        tabDl[n+1] *= tabPrefD[l+1,n+1] * xl
+        tabDl[n+1] *= tabPrefD[n+1,l+1] * xl
     end
 end
 
@@ -294,7 +294,7 @@ function getDln(basis::CB72Basis,
 
     x   = r/rb        # Dimensionless radius
     xl  = x^(l)
-    Dln *= tabPrefD[l+1,n+1] * xl
+    Dln *= tabPrefD[n+1,l+1] * xl
 
     return Dln
 end
