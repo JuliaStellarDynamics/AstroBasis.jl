@@ -1,4 +1,4 @@
 
-
-# very annoying OSX hidden files
+# OSX hidden files
 *.DS_Store
+**/*.DS_Store

@@ -9,4 +9,4 @@ Memoize = "c03570c3-d221-55d1-a50c-7939bbd78826"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [compat]
-julia = "1.5"
+julia = "1.6.7"
