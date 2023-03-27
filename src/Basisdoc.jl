@@ -1,7 +1,8 @@
 """
     Radial basis creation requisites
 
-- Structure with the following attributes :
+- Substructure of the abstract type AbstractAstroBasis
+with the following attributes :
     - name
     - dimension
     - lmax
@@ -15,6 +16,14 @@
     - tabDl
 
 @WARNING: Arrays index are offsetted as basis usually start at l=0, n=0.
+
+Abstract type :
+    struct MyBasisStruct <: AbstractAstroBasis
+         
+        myparameters...
+
+        myarrays...
+    end
 
 - Adapted following functions :
     - fill_prefactors!

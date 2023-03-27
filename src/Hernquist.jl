@@ -12,7 +12,7 @@ data_path_hernquist() = abspath(joinpath(@__DIR__, "tables", "data_HO92_lmax_50_
 
 Radial basis elements from Hernquist & Ostriker (1992)
 """
-struct HernquistBasis
+struct HernquistBasis <: AbstractAstroBasis
 
     name::String         # Basis name (default Hernquist)
     dimension::Int64     # Basis dimension (default 2)

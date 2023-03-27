@@ -8,7 +8,7 @@
 
 Radial basis elements derived by SLE solution, pre-tabulated
 """
-struct EXPeofBasis_type
+struct EXPeofBasis_type <: AbstractAstroBasis
 
     name::String         # Basis name (default CB73)
     dimension::Int64     # Basis dimension (default 2)

@@ -19,7 +19,7 @@ G =1
 
 Radial basis elements from Clutton-Brock (1972)
 """
-struct CB72Basis
+struct CB72Basis <: AbstractAstroBasis
 
     name::String        # Basis name (default CB72)
     dimension::Int64     # Basis dimension (default 2)
@@ -39,7 +39,7 @@ struct CB72Basis
 end
 
 """
-    CB72Basis_create([name, dimension, lmax, nmax, G, rb])
+    CB72BasisCreate([name, dimension, lmax, nmax, G, rb])
 
 Create a CB72Basis structure (and fill prefactors)
 

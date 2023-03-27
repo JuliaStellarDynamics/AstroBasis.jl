@@ -2,6 +2,10 @@ module AstroBasis
 
 using HDF5
 
+# make an abstract Basis type
+# @WARNING: Should be defined before any basis definition
+abstract type AbstractAstroBasis  end
+
 # Documentation of the function needed in a basis
 include("Basisdoc.jl")
 
@@ -20,10 +24,6 @@ include("CB72.jl")
 include("Kalnajs76.jl")
 
 # @IMPROVE, add readers for EXP empirical bases
-
-
-# make a generic Basis data type
-BasisType = Union{CB73Basis,HernquistBasis,CB72Basis,K76Basis}
 
 
 end # module

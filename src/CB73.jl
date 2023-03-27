@@ -14,7 +14,7 @@ data_path_cb73() = abspath(joinpath(@__DIR__, "tables", "data_CB73_lmax_50_nmax_
 
 Radial basis elements from Clutton-Brock (1973)
 """
-struct CB73Basis
+struct CB73Basis <: AbstractAstroBasis
 
     name::String         # Basis name (default CB73)
     dimension::Int64     # Basis dimension (default 2)

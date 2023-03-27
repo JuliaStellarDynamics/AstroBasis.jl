@@ -22,7 +22,7 @@ using Memoize
 
 Radial basis elements from Kalnajs (1976)
 """
-struct K76Basis
+struct K76Basis <: AbstractAstroBasis
 
     name::String        # Basis name (default K76)
     dimension::Int64     # Basis dimension (default 2)
