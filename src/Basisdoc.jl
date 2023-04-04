@@ -6,16 +6,16 @@ with the following attributes :
     - name
     - dimension
     - lmax
-    - nmax
+    - nradial
     - rb
     - G
+    - other usefull parameters
 
-    - tabPrefU
-    - tabPrefD
     - tabUl
     - tabDl
+    - other usefull arrays 
 
-@WARNING: Arrays index are offsetted as basis usually start at l=0, n=0.
+@WARNING: mandatory fields → name, dimension, lmax, nradial, rb, G, tabUl, tabDl
 
 Abstract type :
     struct MyBasisStruct <: AbstractAstroBasis
@@ -25,26 +25,14 @@ Abstract type :
         myarrays...
     end
 
-- Adapted following functions :
-    - fill_prefactors!
+- Adapted following methods :
+    - structure constructor
     - getUln
     - getDln
     - tabUl!
     - tabDl!
 
 """
-
-
-"""
-    fill_prefactors!(basis)
-
-Fill the density and potential prefactors arrays from 'basis'
-
-@WARNING: this may only be run once per session, as it will create constants.
-"""
-function fill_prefactors!(basis)
-    # ... [implementation sold separately] ...
-end
 
 
 """

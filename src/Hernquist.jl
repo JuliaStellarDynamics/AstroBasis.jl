@@ -18,7 +18,7 @@ struct HernquistBasis <: AbstractAstroBasis
     dimension::Int64     # Basis dimension (default 2)
 
     lmax::Int64         # Maximal harmonic/azimuthal index (starts at 0)
-    nmax::Int64         # Maximal radial index (starts at 0)
+    nradial::Int64      # Number of radial basis elements (≥ 1)
 
     G::Float64       # Gravitational constant (default 1.0)
     rb::Float64      # Radial extension (default 1.0)
@@ -33,68 +33,46 @@ end
 
 
 """
-    HernquistBasisCreate([name, dimension, lmax, nmax, G, rb, filename])
+    HernquistBasis([name, dimension, lmax, nmax, G, rb, filename])
 
-Create a HernquistBasis structure (and fill prefactors)
-
-By default,
-name="Hernquist", dimension=2,
-lmax=0, nmax=0,
-G=1., rb=1.
+creates a HernquistBasis structure (and fill prefactors)
 """
-function HernquistBasisCreate(;name::String="Hernquist", dimension::Int64=3,
-                            lmax::Int64=0, nmax::Int64=0,
-                            G::Float64=1., rb::Float64=1.,
-                            filename::String=data_path_hernquist())
+function HernquistBasis(;name::String="Hernquist", dimension::Int64=3,
+                         lmax::Int64=0, nradial::Int64=1,
+                         G::Float64=1., rb::Float64=1.,
+                         filename::String=data_path_hernquist())
 
+    tabPrefU, tabPrefD = ReadFillHernquistPrefactors(lmax,nradial,rb,G,filename)
     basis = HernquistBasis(name,dimension,
-                                      lmax,nmax,
-                                      G,rb,
-                                      zeros(Float64,lmax+1,nmax),zeros(Float64,lmax+1,nmax), # Prefactors arrays
-                                      zeros(Int64,nmax),zeros(Float64,nmax)) # Elements value arrays
-
-    fill_prefactors!(basis,filename)
+                           lmax,nradial,
+                           G,rb,
+                           tabPrefU,tabPrefD, # Prefactors arrays
+                           zeros(Int64,nradial),zeros(Float64,nradial)) # Elements value arrays
 
     return basis
 end
 
 
-
-
-function fill_prefactors!(basis::HernquistBasis,filename::String=data_path_hernquist())
-
-    tabPrefU,tabPrefD = ReadFillHernquistPrefactors(basis.lmax,basis.nmax,basis.rb,basis.G,filename)
-
-    for l=1:basis.lmax+1
-        for n=1:basis.nmax
-            basis.tabPrefU[l,n] = tabPrefU[l,n]
-            basis.tabPrefD[l,n] = tabPrefD[l,n]
-        end
-    end
-
-end
-
-
-"""ReadFillHernquistPrefactors(lmax,nmax[,rb,G,precomputed_filename])
+"""ReadFillHernquistPrefactors(lmax,nradial[,rb,G,precomputed_filename])
 
 reads a table of pre-computed prefactors for Gegenbauer functions
 comes loaded with a pre-computed large table of prefactors (probably more than you need!)
 
 """
-function ReadFillHernquistPrefactors(lmax::Int64,nmax::Int64,
-                                  rb::Float64=1.,G::Float64=1.,
-                                  filename::String=data_path_hernquist())
+function ReadFillHernquistPrefactors(lmax::Int64,nradial::Int64,
+                                     rb::Float64=1.,G::Float64=1.,
+                                     filename::String=data_path_hernquist())
 
     tabαHernquist = h5read(filename,"tab_alphalnp") # Reading the prefactors α_lnp
     tabβHernquist  = h5read(filename,"tab_betalnp")  # Reading the prefactors beta_lnp
 
 
     # generate blank tables: set up as constants; may only be computed once per session
-    tabPrefHernquist_Ulnp = zeros(Float64,lmax+1,nmax) # Table of the prefactors of the POTENTIAL basis functions, i.e. the Ulnp !! ATTENTION, size is lmax+1 as l=0 exists
-    tabPrefHernquist_Dlnp = zeros(Float64,lmax+1,nmax) # Table of the prefactors of the DENSITY   basis functions, i.e. the Dlnp !! ATTENTION, size is lmax+1 as l=0 exists
+    tabPrefHernquist_Ulnp = zeros(Float64,lmax+1,nradial) # Table of the prefactors of the POTENTIAL basis functions, i.e. the Ulnp !! ATTENTION, size is lmax+1 as l=0 exists
+    tabPrefHernquist_Dlnp = zeros(Float64,lmax+1,nradial) # Table of the prefactors of the DENSITY   basis functions, i.e. the Dlnp !! ATTENTION, size is lmax+1 as l=0 exists
 
     for l=0:lmax # Loop over the harmonic indices. ATTENTION, harmonic index starts at l=0
-        for n=0:nmax-1 # Loop over the radial basis numbers
+        for n=0:nradial-1 # Loop over the radial basis numbers
             α = tabαHernquist[l+1,n+1]  # Reading the value of α. l,np starts at 0
             β  = tabβHernquist[l+1,n+1]   # Reading the value of β.  l,np starts at 0
 
@@ -106,8 +84,7 @@ function ReadFillHernquistPrefactors(lmax::Int64,nmax::Int64,
         end
     end
 
-    return tabPrefHernquist_Ulnp,tabPrefHernquist_Dlnp
-
+    return tabPrefHernquist_Ulnp, tabPrefHernquist_Dlnp
 end
 
 """
@@ -226,7 +203,7 @@ end
 
 function tabUl!(basis::HernquistBasis,l::Int64,r::Float64)
 
-    tabUlnpHernquist!(l,r,basis.tabUl,basis.nmax,basis.tabPrefU,basis.rb)
+    tabUlnpHernquist!(l,r,basis.tabUl,basis.nradial,basis.tabPrefU,basis.rb)
     #return UlnpHernquist(l,np,r,basis.tabPrefU,basis.rb)
 end
 
@@ -268,5 +245,5 @@ end
 
 function tabDl!(basis::HernquistBasis,l::Int64,r::Float64)
 
-    tabDlnpHernquist!(l,r,basis.tabDl,basis.nmax,basis.tabPrefD,basis.rb)
+    tabDlnpHernquist!(l,r,basis.tabDl,basis.nradial,basis.tabPrefD,basis.rb)
 end

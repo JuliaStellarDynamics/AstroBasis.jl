@@ -14,7 +14,7 @@ struct EXPeofBasis_type <: AbstractAstroBasis
     dimension::Int64     # Basis dimension (default 2)
 
     lmax::Int64         # Maximal harmonic/azimuthal index (starts at 0)
-    nmax::Int64         # Maximal radial index (starts at 0)
+    nradial::Int64      # Number of radial basis elements (≥ 1)
 
     G::Float64       # Gravitational constant (MUST be 1.0)
     rb::Float64      # Radial extension (default 1.0)
@@ -60,7 +60,7 @@ function read_cache(isocache::String)
 
     seek(io,0)
     lmax = read(io,UInt32)
-    nmax = read(io,UInt32)
+    nradial = read(io,UInt32)
     numr = read(io,UInt32)
     cmap = read(io,UInt32)
 
@@ -68,11 +68,11 @@ function read_cache(isocache::String)
     rmax  = read(io,Float64)
     scale = read(io,Float64)
 
-    EVtable    = Array{Float64}(undef, (lmax+1,nmax))
+    EVtable    = Array{Float64}(undef, (lmax+1,nradial))
     Rtable     = Array{Float64}(undef,(numr))
     XItable    = Array{Float64}(undef,(numr))
-    EFtablePOT = Array{Float64}(undef, (lmax+1,nmax,numr))
-    EFtableDEN = Array{Float64}(undef, (lmax+1,nmax,numr))
+    EFtablePOT = Array{Float64}(undef, (lmax+1,nradial,numr))
+    EFtableDEN = Array{Float64}(undef, (lmax+1,nradial,numr))
 
 
 
@@ -93,10 +93,10 @@ function read_cache(isocache::String)
 
     for l=1:lmax+1
         dummyl = read(io,UInt32)
-        for n=1:nmax
+        for n=1:nradial
             EVtable[l,n] = read(io,Float64)
         end
-        for n=1:nmax
+        for n=1:nradial
             for r=1:numr
                 tmpval = read(io,Float64)
                 EFtableDEN[l,n,r] = tmpval*sqrt.(EVtable[l,n])*  iso_density(Rtable[r])
@@ -119,7 +119,7 @@ function read_cache_header(isocache::String)
 
     seek(io,0)
     lmax = read(io,UInt32)
-    nmax = read(io,UInt32)
+    nradial = read(io,UInt32)
     numr = read(io,UInt32)
     cmap = read(io,UInt32)
 
@@ -130,7 +130,7 @@ function read_cache_header(isocache::String)
     xmax = (rmax/scale - 1.0)/(rmax/scale + 1.0)
     dxi = (xmax-xmin)/(numr)
 
-    return lmax,nmax,scale,numr,xmin,xmax,dxi
+    return lmax,nradial,scale,numr,xmin,xmax,dxi
 end
 
 ##################################################
@@ -174,7 +174,7 @@ end
 
 function fill_prefactors!(isocache::String)
     RTable,XItable,EFtableDEN,EFtablePOT = read_cache(isocache)
-    lmax_eof,nmax_eof,scale,numr,xmin,xmax,dxi = read_cache_header(isocache)
+    lmax_eof,nradial_eof,scale,numr,xmin,xmax,dxi = read_cache_header(isocache)
 end
 
 

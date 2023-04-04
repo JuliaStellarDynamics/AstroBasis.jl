@@ -6,12 +6,6 @@ To use with azimuthal elements e^{i l phi} (not spherical harmonics).
 
 @WARNING: Index starts at n=0. We therefore define nmax = nradial-1 the maximal
 radial index (as lmax for azimuthal/harmonic index l).
-
-@IMPROVE make rb only need to be set in one spot?
-
-By default,
-rb=1
-G =1
 """
 
 """
@@ -25,7 +19,7 @@ struct CB72Basis <: AbstractAstroBasis
     dimension::Int64     # Basis dimension (default 2)
 
     lmax::Int64         # Maximal harmonic/azimuthal index (starts at 0)
-    nmax::Int64         # Maximal radial index (starts at 0)
+    nradial::Int64      # Number of radial basis elements (≥ 1)
 
     G::Float64          # Gravitational constant (default 1.0)
     rb::Float64         # Radial extension (default 1.0)
@@ -39,24 +33,19 @@ struct CB72Basis <: AbstractAstroBasis
 end
 
 """
-    CB72BasisCreate([name, dimension, lmax, nmax, G, rb])
+    CB72Basis([name, dimension, lmax, nradial, G, rb])
 
-Create a CB72Basis structure (and fill prefactors)
-
-By default,
-name="CB72", dimension=2,
-lmax=0, nmax=0,
-G=1., rb=1.
+creates a CB72Basis structure (and fill prefactors)
 """
-function CB72BasisCreate(;name::String="CB72", dimension::Int64=2,
-                            lmax::Int64=0, nmax::Int64=0,
-                            G::Float64=1., rb::Float64=1.)
+function CB72Basis(;name::String="CB72", dimension::Int64=2,
+                    lmax::Int64=0, nradial::Int64=0,
+                    G::Float64=1., rb::Float64=1.)
 
     basis = CB72Basis(name,dimension,
-                      lmax,nmax,
+                      lmax,nradial,
                       G,rb,
-                      zeros(Float64,nmax+1,lmax+1),zeros(Float64,nmax+1,lmax+1), # Prefactors arrays
-                      zeros(Int64,nmax+1),zeros(Float64,nmax+1)) # Elements value arrays
+                      zeros(Float64,nradial,lmax+1),zeros(Float64,nradial,lmax+1), # Prefactors arrays
+                      zeros(Int64,nradial),zeros(Float64,nradial)) # Elements value arrays
 
     FillPrefactors!(basis)
 
@@ -94,9 +83,11 @@ prefactors_recurrence_l_CB72.
 """
 function FillPrefactors!(basis::CB72Basis)
 
-    lmax, nmax  = basis.lmax, basis.nmax
-    G, rb       = basis.G, basis.rb
+    lmax, nradial   = basis.lmax, basis.nradial
+    G, rb           = basis.G, basis.rb
     tabPrefU, tabPrefD = basis.tabPrefU, basis.tabPrefD
+
+    nmax = nradial - 1
 
     dimU = - sqrt(G / rb)                       # Potential basis element dimensional prefactor
     dimD = 1.0 / ( 2.0*pi*sqrt(G * (rb)^(3)) )  # Density basis element dimensional prefactor
@@ -165,10 +156,12 @@ function tabUl!(basis::CB72Basis,
                     l::Int64,r::Float64,
                     forD::Bool=false)
 
-    nmax        = basis.nmax
+    nradial     = basis.nradial
     rb          = basis.rb
     tabPrefU    = basis.tabPrefU
     tabl        = forD ? basis.tabDl : basis.tabUl
+
+    nmax = nradial - 1
 
     x   = r/rb        # Dimensionless radius
     xl  = x^(l)
@@ -252,10 +245,12 @@ function tabDl!(basis::CB72Basis,
     #####
     # Deduce density basis elements at azimuthal number l without prefactors
     #####
-    nmax        = basis.nmax
+    nradial     = basis.nradial
+    nmax        = nradial - 1
     rb          = basis.rb
     tabPrefD    = basis.tabPrefD
     tabDl       = basis.tabDl
+
     # For radial number n > 1.
     for n=nmax:-1:2 # Loop over the radial basis numbers. ATTENTION, index starts at n=0. In reverse order for no impact of the previous change.
         tabDl[n+1] -= tabDl[n-1]

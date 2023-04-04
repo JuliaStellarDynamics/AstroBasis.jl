@@ -28,7 +28,7 @@ struct K76Basis <: AbstractAstroBasis
     dimension::Int64     # Basis dimension (default 2)
 
     lmax::Int64         # Maximal harmonic/azimuthal index (starts at 0)
-    nmax::Int64         # Maximal radial index (starts at 0)
+    nradial::Int64      # Number of radial basis elements (≥ 1)
 
     G::Float64          # Gravitational constant (default 1.0)
     rb::Float64         # Radial extension (default 1.0)
@@ -46,24 +46,19 @@ end
 """
     K76BasisCreate([name, dimension, lmax, nmax, G, rb])
 
-Create a K76Basis structure
-
-By default,
-name="K76", dimension=2,
-lmax=0, nmax=0,kKA=1
-G=1., rb=1.
+creates a K76Basis structure
 """
-function K76BasisCreate(;name::String="K76", dimension::Int64=2,
-                            lmax::Int64=0, nmax::Int64=0,
-                            G::Float64=1., rb::Float64=1., kKA::Int64=1)
+function K76Basis(;name::String="K76", dimension::Int64=2,
+                   lmax::Int64=0, nradial::Int64=1,
+                   G::Float64=1., rb::Float64=1., kKA::Int64=1)
 
     basis = K76Basis(name,dimension,
-                     lmax,nmax,
+                     lmax,nradial,
                      G,rb,kKA,
-                     zeros(Float64,lmax+1,nmax+1),zeros(Float64,lmax+1,nmax+1), # Prefactors arrays
-                     zeros(Int64,nmax+1),zeros(Float64,nmax+1)) # Elements value arrays
+                     zeros(Float64,lmax+1,nradial),zeros(Float64,lmax+1,nradial), # Prefactors arrays
+                     zeros(Int64,nradial),zeros(Float64,nradial)) # Elements value arrays
 
-    fill_prefactors!(basis)
+    FillPrefactors!(basis)
 
     return basis
 end
@@ -84,9 +79,9 @@ end
 
 Kalnajs (1976) prefactors
 """
-function fill_prefactors!(basis::K76Basis)
+function FillPrefactors!(basis::K76Basis)
 
-    lmax, nmax  = basis.lmax, basis.nmax
+    lmax, nradial  = basis.lmax, basis.nradial
     G, rb       = basis.G, basis.rb
     kKA         = basis.kKA
     tabPrefU, tabPrefD = basis.tabPrefU, basis.tabPrefD
@@ -94,7 +89,7 @@ function fill_prefactors!(basis::K76Basis)
     dimU = - sqrt(G / rb)                       # Potential basis element dimensional prefactor
     dimD = 1.0 / ( sqrt(G * (rb)^(3)) )  # Density basis element dimensional prefactor
     # Initialization
-    for n=0:nmax # Loop over the radial basis numbers. ATTENTION, index starts at n=0
+    for n=0:nradial-1 # Loop over the radial basis numbers. ATTENTION, index starts at n=0
         for l=0:lmax # Loop over the harmonic indices. ATTENTION, harmonic index starts at l=0 
             tabPrefU[l+1,n+1] = dimU * PcoeffK76(kKA,l,n)
             tabPrefD[l+1,n+1] = (-1)^(n) * dimD * ScoeffK76(kKA,l,n)
@@ -139,7 +134,8 @@ For Kalnajs (1976) basis elements.
 function tabUl!(basis::K76Basis,
                     l::Int64,r::Float64)
 
-    nmax        = basis.nmax
+    nradial     = basis.nradial
+    nmax        = nradial - 1
     rb          = basis.rb
     kKA         = basis.kKA
     tabPrefU    = basis.tabPrefU
@@ -212,7 +208,8 @@ For Kalnajs (1976) basis elements.
 function tabDl!(basis::K76Basis,
                     l::Int64,r::Float64)
 
-    nmax        = basis.nmax
+    nradial     = basis.nradial
+    nmax        = nradial - 1
     rb          = basis.rb
     kKA         = basis.kKA
     tabPrefD    = basis.tabPrefD
@@ -222,8 +219,7 @@ function tabDl!(basis::K76Basis,
     
     fill!(tabDl,0.0)
 
-    if x > 1.0
-    else
+    if x <= 1.0
         for n=0:nmax # Loop over the radial basis numbers. ATTENTION, index starts at n=0
             for j=0:n
                 tabDl[n+1] += betaK76(kKA,l,n,j) * (1.0-x*x)^(j)
@@ -250,8 +246,7 @@ function getDln(basis::K76Basis,
     x   = r/rb        # Dimensionless radius
 
     res = 0.0
-    if x > 1.0
-    else
+    if x <= 1.0
         for j=0:n
             res += betaK76(kKA,l,n,j) * (1.0-x*x)^(j)
         end
