@@ -2,3 +2,6 @@
 # OSX hidden files
 *.DS_Store
 **/*.DS_Store
+
+# Documentation (avoid committing generated content)
+docs/build/
