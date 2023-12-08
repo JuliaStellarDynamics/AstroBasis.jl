@@ -1,6 +1,8 @@
 
 # AstroBasis.jl
 
+[![image](https://github.com/JuliaStellarDynamics/AstroBasis.jl/actions/workflows/documentation.yml/badge.svg?branch=documentation)](https://juliastellardynamics.github.io/AstroBasis.jl/)
+
 `AstroBasis.jl` is a package written in Julia to compute basis function evaluations, primarily for astronomical models.
 
 -----------------------------
