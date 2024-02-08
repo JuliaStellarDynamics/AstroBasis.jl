@@ -51,3 +51,4 @@ plU=plot(tabx, transpose(tabU), title = "Potential basis elements: Clutton-Brock
 xlabel!(plU, L"$r / r_{\mathrm{b}}$")
 ylabel!(plU, L"$U^{\ell}_n (r)\quad \ell=$"*string(ltest))
 savefig(plU,"CluttonBrock73.png")
+println("The plot has been saved in the same folder as this example script under the name 'CluttonBrock.png'.")
