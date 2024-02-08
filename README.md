@@ -8,14 +8,18 @@
 ---
 ## Installation
 
-If you are new to `julia`, install the latest version by running this in your terminal:
-```
-$ curl -fsSL https://install.julialang.org | sh
-```
-<font size="1"> If you are on Windows or struggle with installation, please visit [this website](https://julialang.org/downloads/). </font>
+Install Julia by following the instructions at [julialang.org/downloads/](https://julialang.org/downloads/).
 
-Once `julia` installed, you need to install this library. You can either 
-* add it to your global julia environment by simply running:
+To invoke Julia in the Terminal, you need to make sure that the `julia` command-line program is in your `PATH`. 
+See [here](https://julialang.org/downloads/platform/#optional_add_julia_to_path) for detailed instructions.
+
+*If you do not want to install Julia but want to test the library, you can use this [Google colab notebook](https://colab.research.google.com/drive/1g5AD8zzwyqmufqVdYEzkdi5hdifu-z2S?usp=sharing).
+However, Google colab is not primarly made to run Julia code. 
+It will then need to be installed on the remote machine which can take a few minutes.
+This notebook is not maintained as a priority. We would recommand you install Julia on your machine to test the library locally.*
+
+Once Julia installed, you need to install the `AstroBasis.jl` library. You can either 
+* add it to your global Julia environment by simply running:
 ```
 $ julia -e 'using Pkg; Pkg.add(url="https://github.com/JuliaStellarDynamics/OrbitalElements.jl.git")'
 ```
@@ -26,7 +30,8 @@ $ git clone https://github.com/JuliaStellarDynamics/AstroBasis.jl.git
 $ cd AstroBasis.jl
 $ julia --project=. -e 'using Pkg; Pkg.precompile()'
 ```
-<font size="1"> Note that if you use this second install option you will always need to run codes in the project context by adding the option `--project=/path/to/AstroBasis.jl` after `julia`. The library will not be accessible in your global julia context.</font>
+*Note that if you use this second install option you will always need to run codes in the project context by adding the option `--project=/path/to/AstroBasis.jl` after `julia`. 
+The library will not be accessible in your global Julia context.*
 
 Then, in your program, if you want use `AstroBasis` function, write `import AstroBasis`.
 
@@ -35,15 +40,16 @@ Then, in your program, if you want use `AstroBasis` function, write `import Astr
 
 An introduction example is given in `example/test_AstroBasis.jl`.
 
-If you installed the library using the first (global) install option, just download this example [file](https://github.com/JuliaStellarDynamics/AstroBasis.jl/blob/main/examples/CB72tests.jl) from the github repository.
+If you installed the library using the first (global) install option, just download this example [file](https://github.com/JuliaStellarDynamics/AstroBasis.jl/blob/main/examples/test_AstroBasis.jl) from the github repository.
 
 Run the code with the following command:
 ```
 $ julia /path/to/test_AstroBasis.jl
 ```
-<font size="1"> Do not forget the option `--project=/path/to/AstroBasis.jl` after `julia` if you installed it the local way.</font>
+*Do not forget the option `--project=/path/to/AstroBasis.jl` after `julia` if you installed it the local way.*
 
-This example will first install some required libraries (`Plots`, `LaTeXStrings`). These installations might take a few minutes when first called.
+This example will first install some required libraries (`Plots`, `LaTeXStrings`). These installations might take up to a minute when first called.
+If you want to modify the parameters in the example file and run it again, you can comment the corresponding lines to avoid installation checks.
 
 The resulting plot will be created in the same folder as the test code under the name `CluttonBrock73.png`.
 
