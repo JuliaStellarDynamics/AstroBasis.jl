@@ -38,7 +38,7 @@ julia test_AstroBasis.jl
 ```
 <sup><sub>*If you want to work in a given environment, do not forget the* `--project=/path/to/my_env` *option.*</sub></sup>
 
-This example will first install some required libraries (`Plots`, `LaTeXStrings`). These installations might take up to a minute when first called.
+This example will first install some required libraries (`Plots`, `LaTeXStrings`) and their dependencies. These installations might take up to 4 minutes.
 
 The resulting plot will be created in the same folder as the test code under the name `CluttonBrock73.png`.
 
