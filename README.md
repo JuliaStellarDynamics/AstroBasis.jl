@@ -13,19 +13,30 @@ Install Julia by following the instructions at [julialang.org/downloads/](https:
 To invoke Julia in the Terminal, you need to make sure that the `julia` command-line program is in your `PATH`. 
 See [here](https://julialang.org/downloads/platform/#optional_add_julia_to_path) for detailed instructions.
 
-Once Julia installed, clone the `AstroBasis.jl` library and precompile it by running:
-```
-git clone https://github.com/JuliaStellarDynamics/AstroBasis.jl.git
-cd AstroBasis.jl
-julia --project=. -e 'using Pkg; Pkg.precompile()'
-```
+We will now proceed to the installation of the `AstroBasis` library.
 
-An introduction example is given in `example/test_AstroBasis.jl`.
-Run the code with the following command:
+**Note on working with environments.** *By default packages are added to the default environment at ~/.julia/environments/v1.#.* 
+*It is however easy to create other, independent, projects.*
+*If you want to install the* `AstroBasis` *package in a different/test environment, first create a folder to host the environment files (Project.toml and Manifest.toml which will be created later on).* 
+*Then, for every command line invoking Julia, use* `julia --project=/path/to/my_env` *instead of* `julia` *alone.* 
+*Note that packages will always be cloned in ~/.julia/packages but only accessible in your project's context.* 
+*A procedure to fully uninstall the package is described at the end of this readme.*
+
+Install the `AstroBasis` library by running
 ```
-julia --project=. examples/test_AstroBasis.jl
+julia -e 'using Pkg; Pkg.add(url="https://github.com/JuliaStellarDynamics/AstroBasis.jl.git")'
 ```
-*Make sure you still are at the* `/path/to/AstroBasis.jl` *location.*
+<sup><sub>*If you want to work in a given environment, do not forget the* `--project=/path/to/my_env` *option.*</sub></sup>
+
+An introduction example is given in `example/test_AstroBasis.jl`. Download the file by running:
+```
+wget https://raw.githubusercontent.com/JuliaStellarDynamics/AstroBasis.jl/main/examples/test_AstroBasis.jl
+```
+Then run the code with the following commands
+```
+julia test_AstroBasis.jl
+```
+<sup><sub>*If you want to work in a given environment, do not forget the* `--project=/path/to/my_env` *option.*</sub></sup>
 
 This example will first install some required libraries (`Plots`, `LaTeXStrings`). These installations might take up to a minute when first called.
 
@@ -49,31 +60,30 @@ It will then need to be installed on the remote machine which can take a few min
 This notebook is not maintained as a priority. We would recommand you install Julia on your machine to test the library locally.*
 
 ---
-## More recurrent usage
-
-If you followed the quick installation and use test, you have installed `ÀstroBasis` and ran the example in a local environment (or project) associated to the clone's folder.
-The library then won't be accessible outside this local scope (hence the need for the `--project=.` option).
-If you want to use the library functions more regularly, we recommand you bring it to the global scope by either
-* linking the clone to the global scope by running
-```
-julia -e 'using Pkg; Pkg.add(url="/localpath/to/AstroBasis.jl")'
-```
-*This link might be affected by any change in the clone's location.*
-
-or 
-* installing the library directly in Julia's global scope (it will clone the repository somewhere in Julia's folder `.julia/packages`) by running
-```
-julia -e 'using Pkg; Pkg.add(url="https://github.com/JuliaStellarDynamics/AstroBasis.jl.git")'
-```
-*You can then delete your "local" clone.*
-
-You will then be able to use `AstroBasis` functions in any of your scripts by writing `import AstroBasis`.
-
----
 ## Documentation and usage
 
 To get more familiar with the content of the library and start and design your own use case, you may want to visit the [documentation](https://juliastellardynamics.github.io/AstroBasis.jl/).
 
+---
+## Uninstall
+
+First start by removing the package from the environment by running
+```
+julia -e 'using Pkg; Pkg.rm("AstroBasis");'
+```
+<sup><sub>*If you worked in a given environment, do not forget the* `--project=/path/to/my_env` *option.*</sub></sup>
+
+Following the same syntax, you can also remove the `Plots` and `LaTeXString` packages installed for the example if you want to. 
+
+If you worked in a test environment (that you do not want to keep) you can also simply erase the folder using `rm -r /path/to/my_env`.
+
+Then to fully erase the package (installed in ~/.julia), run
+```
+julia -e 'using Pkg; using Dates; Pkg.gc(collect_delay=Day(0));'
+```
+<sup><sub>*No need for the* `--project=/path/to/my_env` *option here anyway!*</sub></sup>
+
+It will erase all the packages which are not known in any of your "active" (i.e., for which the Manifest.toml file is reachable) project/environments, in particular `AstroBasis`.
 
 ---
 ## Authors
