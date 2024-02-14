@@ -2,8 +2,7 @@
 # Installing the necessary libraries
 ########################################
 using Pkg
-Pkg.add("Plots")
-Pkg.add("LaTeXStrings")
+Pkg.add(["Plots","LaTeXStrings"])
 
 ########################################
 # Importing the necessary libraries
