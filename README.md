@@ -15,20 +15,14 @@ See [here](https://julialang.org/downloads/platform/#optional_add_julia_to_path)
 
 We will now proceed to the installation of the `AstroBasis` library.
 
-**Note on working with environments.** *By default packages are added to the default environment at ~/.julia/environments/v1.#.* 
-*It is however easy to create other, independent, projects.*
-*If you want to install the* `AstroBasis` *package in a different/test environment, first create a folder to host the environment files (Project.toml and Manifest.toml which will be created later on).* 
-*Then, for every command line invoking Julia, use* `julia --project=/path/to/my_env` *instead of* `julia` *alone.* 
-*Note that packages will always be cloned in ~/.julia/packages but only accessible in your project's context.* 
-*A procedure to fully uninstall the package is described at the end of this readme.*
+**Caution:** If you wish to exercise extra care to prevent any interference with other installed libraries (e.g., avoiding updates), please refer to the "Notes on working with environments" section below.
 
 Install the `AstroBasis` library by running
 ```
 julia -e 'using Pkg; Pkg.add(url="https://github.com/JuliaStellarDynamics/AstroBasis.jl.git")'
 ```
-<sup><sub>*If you want to work in a given environment, do not forget the* `--project=/path/to/my_env` *option.*</sub></sup>
 
-An introduction example is given in `example/test_AstroBasis.jl`. Download the file by running:
+An introduction example is given in `examples/test_AstroBasis.jl`. Download the file by running:
 ```
 wget https://raw.githubusercontent.com/JuliaStellarDynamics/AstroBasis.jl/main/examples/test_AstroBasis.jl
 ```
@@ -36,7 +30,6 @@ Then run the code with the following commands
 ```
 julia test_AstroBasis.jl
 ```
-<sup><sub>*If you want to work in a given environment, do not forget the* `--project=/path/to/my_env` *option.*</sub></sup>
 
 This example will first install some required libraries (`Plots`, `LaTeXStrings`) and their dependencies. These installations might take up to 4 minutes.
 
@@ -44,12 +37,23 @@ The resulting plot will be created in the same folder as the test code under the
 
 ![`Clutton-Brock (1973)`](examples/CluttonBrock73_original.png)
 
+---
+### Note on working with environments
 
+By default, packages are added to the default environment at ~/.julia/environments/v1.#.
+It is however easy to create other, independent, projects.
+If you want to install the `AstroBasis` package in a different/test environment, first create a folder to host the environment files (Project.toml and Manifest.toml which will be created later on).
+Then, for every command line invoking Julia, use `julia --project=/path/to/my_env` instead of `julia` alone.
+
+*Note that packages will always be cloned in ~/.julia/packages but only accessible in your project's context.* 
+*A procedure to fully uninstall the package is described at the end of this readme.*
+
+---
 ### Interactive notebook
 
 If you prefer interactive Jupyter notebooks, you will need to install `IJulia` following these [instructions](https://github.com/JuliaLang/IJulia.jl).
 
-The interactive introduction example is then given in `example/test_AstroBasis.ipynb`.
+An interactive introduction example is given in [`examples/test_AstroBasis.ipynb`](examples/test_AstroBasis.ipynb).
 
 ---
 ### Without installing Julia
@@ -71,7 +75,6 @@ First start by removing the package from the environment by running
 ```
 julia -e 'using Pkg; Pkg.rm("AstroBasis");'
 ```
-<sup><sub>*If you worked in a given environment, do not forget the* `--project=/path/to/my_env` *option.*</sub></sup>
 
 Following the same syntax, you can also remove the `Plots` and `LaTeXString` packages installed for the example if you want to. 
 
@@ -81,7 +84,7 @@ Then to fully erase the package (installed in ~/.julia), run
 ```
 julia -e 'using Pkg; using Dates; Pkg.gc(collect_delay=Day(0));'
 ```
-<sup><sub>*No need for the* `--project=/path/to/my_env` *option here anyway!*</sub></sup>
+<sup><sub>*No need for the* `--project=/path/to/my_env` *option here !*</sub></sup>
 
 It will erase all the packages which are not known in any of your "active" (i.e., for which the Manifest.toml file is reachable) project/environments, in particular `AstroBasis`.
 

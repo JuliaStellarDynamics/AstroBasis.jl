@@ -3,5 +3,9 @@
 *.DS_Store
 **/*.DS_Store
 
+# Jupyter notebooks files
+.ipynb_checkpoints/*
+**/.ipynb_checkpoints/*
+
 # Documentation (avoid committing generated content)
 docs/build/
