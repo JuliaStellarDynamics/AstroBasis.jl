@@ -91,6 +91,6 @@ It will erase all the packages which are not known in any of your "active" (i.e.
 ---
 ## Authors
 
-Mike Petersen -  @michael-petersen - michael.petersen@roe.ac.uk, petersen@iap.fr
+Mike Petersen -  [@michael-petersen](https://github.com/michael-petersen) - michael.petersen@roe.ac.uk
 
-Mathieu Roule -  @MathieuRoule - roule@iap.fr
+Mathieu Roule -  [@MathieuRoule](https://github.com/MathieuRoule) - roule@iap.fr
