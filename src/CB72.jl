@@ -280,7 +280,11 @@ function getDln(basis::CB72Basis,
     #####
     # # Deduce density basis elements at azimuthal number l without prefactors
     #####
-    Dln = u2 - u0
+    if n<2
+        Dln = u2
+    else
+        Dln = u2 - u0
+    end
     #####
     # Adding prefactors
     #####
