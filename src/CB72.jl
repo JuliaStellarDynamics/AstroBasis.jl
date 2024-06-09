@@ -9,14 +9,28 @@ radial index (as lmax for azimuthal/harmonic index l).
 """
 
 """
-    CB72Basis
+    CB72Basis <: RazorThinBasis
 
-Radial basis elements from Clutton-Brock (1972)
+A structure for interfacing with the radial basis elements of Clutton-Brock (1972).
+
+# Fields
+- `name::String`: Basis name (default CB72).
+- `lmax::Int64`: Maximal harmonic/azimuthal index (starts at 0).
+- `nradial::Int64`: Number of radial basis elements (≥ 1).
+- `G::Float64`: Gravitational constant (default 1.0).
+- `rb::Float64`: Radial extension (default 1.0).
+- `tabPrefU::Array{Float64,2}`: Potential prefactors array.
+- `tabPrefD::Array{Float64,2}`: Density prefactors array.
+- `tabUl::Array{Float64,1}`: Potential elements value array.
+- `tabDl::Array{Float64,1}`: Density elements value array.
+
+# Description
+The `CB72Basis` structure is the interface to the radial basis elements as defined
+by Clutton-Brock (1972). 
 """
-struct CB72Basis <: AbstractAstroBasis
+struct CB72Basis <: RazorThinBasis
 
     name::String        # Basis name (default CB72)
-    dimension::Int64     # Basis dimension (default 2)
 
     lmax::Int64         # Maximal harmonic/azimuthal index (starts at 0)
     nradial::Int64      # Number of radial basis elements (≥ 1)
@@ -32,22 +46,23 @@ struct CB72Basis <: AbstractAstroBasis
 
 end
 
+
 """
     CB72Basis([name, dimension, lmax, nradial, G, rb])
 
 creates a CB72Basis structure (and fill prefactors)
 """
-function CB72Basis(;name::String="CB72", dimension::Int64=2,
+function CB72Basis(;name::String="CB72",
                     lmax::Int64=0, nradial::Int64=0,
                     G::Float64=1., rb::Float64=1.)
 
-    basis = CB72Basis(name,dimension,
+    basis = CB72Basis(name,
                       lmax,nradial,
                       G,rb,
                       zeros(Float64,nradial,lmax+1),zeros(Float64,nradial,lmax+1), # Prefactors arrays
                       zeros(Int64,nradial),zeros(Float64,nradial)) # Elements value arrays
 
-    FillPrefactors!(basis)
+    _FillPrefactors!(basis)
 
     return basis
 end
@@ -57,7 +72,7 @@ end
 # Computation of the prefactors
 ##################################################
 """
-    PrefactorsAzimuthalRecurrenceCB72(previous, l, n)
+    _PrefactorsAzimuthalRecurrenceCB72(previous, l, n)
 
 Gives the next adimensional prefactor (recurrence over azimuthal number l),
 a^n_l = a^n_{l-1} * 2 * sqrt( 1 / [(n+2l)*(n+2l-1)] ),
@@ -66,14 +81,14 @@ given the previous one (a^n_{l-1}).
 Initializing the recurrence at a^n_0 = sqrt(2), one gets the expected prefactor
 a^n_l = 2^(l+1/2) * sqrt( n! / (n+2l)! ).
 """
-function PrefactorsAzimuthalRecurrenceCB72(previous::Float64,
+function _PrefactorsAzimuthalRecurrenceCB72(previous::Float64,
                                       l::Int64,
                                       n::Int64)::Float64
     return 2.0 * sqrt( 1.0 / ( (n+2.0*l)*(n+2.0*l-1.0) ) ) * previous
 end
 
 """
-    FillPrefactors!(basis::CB72Basis)
+    _FillPrefactors!(basis::CB72Basis)
 
 Clutton-Brock (1972) prefactors a^n_l = 2^(l+1/2) * sqrt( n! / (n+2l)! )
 computed through the recurrence relation given by the function
@@ -81,7 +96,7 @@ prefactors_recurrence_l_CB72.
 
 @IMPROVE precompute the a^n_l up to a given limit and save them in a file to read?
 """
-function FillPrefactors!(basis::CB72Basis)
+function _FillPrefactors!(basis::CB72Basis)
 
     lmax, nradial   = basis.lmax, basis.nradial
     G, rb           = basis.G, basis.rb
@@ -99,8 +114,8 @@ function FillPrefactors!(basis::CB72Basis)
     # Recurrence
     for n=0:nmax # Loop over the radial basis numbers. ATTENTION, index starts at n=0
         for l=1:lmax # Loop over the harmonic indices. ATTENTION, harmonic index starts at l=0 (here 0 has been initialized)
-            tabPrefU[n+1,l+1] = PrefactorsAzimuthalRecurrenceCB72(tabPrefU[n+1,l],l,n)
-            tabPrefD[n+1,l+1] = PrefactorsAzimuthalRecurrenceCB72(tabPrefD[n+1,l],l,n)
+            tabPrefU[n+1,l+1] = _PrefactorsAzimuthalRecurrenceCB72(tabPrefU[n+1,l],l,n)
+            tabPrefD[n+1,l+1] = _PrefactorsAzimuthalRecurrenceCB72(tabPrefD[n+1,l],l,n)
         end
     end
 
@@ -111,23 +126,23 @@ end
 # Computation of the potential basis elements
 ##################################################
 """
-    ρCB72(x)
+    _ρCB72(x)
 
 returns the parameter -1 <= ρ <= 1 for a given dimensionless radius x=r/rb.
 """
-@inline function ρCB72(x::Float64)::Float64
+@inline function _ρCB72(x::Float64)::Float64
     return (x*x - 1.0)/(x*x + 1.0) # Value of rho
 end
 
 """
-    UAzimuthalInitializationCB72(x, l)
+    _UAzimuthalInitializationCB72(x, l)
 
 Gives the (n=0, l) adimensional potential basis element value at a given position x = r/rb,
 xi^0_l(x) = prod(2k - 1, k=1 -> l) / [  (1 + x^2)^{l + 1/2}   ].
 
 @IMPROVE other function to give the initialization for all l simultaneously through recurrence?
 """
-function UAzimuthalInitializationCB72(x::Float64,
+function _UAzimuthalInitializationCB72(x::Float64,
                                               l::Int64)::Float64
     return prod(1:2:(2*l-1)) / (sqrt(1.0 + x*x) * (1.0 + x*x)^(l))
 end
@@ -141,7 +156,7 @@ xi^n_l(x), given the 2 previous ones, xi^{n-1}_l(x) and xi^{n-2}_l(x).
 Initializing the recurrence at xi^0_l given by the initialization from U_init_l_CB72,
 one get the right next adimensional potential basis element from Clutton-Brock (1972).
 """
-function URadialRecurrenceCB72(u0::Float64, u1::Float64,
+function _URadialRecurrenceCB72(u0::Float64, u1::Float64,
                                 ρ::Float64,
                                 l::Int64, n::Int64)::Float64
     return ( 2.0 + ((2.0*l-1.0)/n) ) * ρ * u1 - ( 1.0 + ((2.0*l-1.0)/n) ) * u0
@@ -150,7 +165,32 @@ end
 """
     tabUl!(basis::CB72Basis, l, r[, forD])
 
-For Clutton-Brock (1972) basis elements.
+Compute the Clutton-Brock (1972) basis elements for a given `CB72Basis` structure.
+
+# Arguments
+- `basis::CB72Basis`: The `CB72Basis` structure containing basis parameters and prefactors.
+- `l::Int64`: The harmonic/azimuthal index.
+- `r::Float64`: The radial coordinate.
+- `forD::Bool=false`: A boolean flag indicating whether to use density prefactors. Default is `false`.
+
+# Description
+This function computes the basis elements for the Clutton-Brock (1972) model. It updates the
+potential or density basis elements in-place within the provided `CB72Basis` structure.
+
+# Implementation Details
+- The function initializes the recurrence relation for the adimensional subpart of the basis elements.
+- It then iterates through the radial basis numbers, updating the basis elements using a recurrence relation.
+- Finally, it multiplies the computed values by the appropriate prefactors.
+
+# Example
+```julia
+# Assuming basis is an instance of CB72Basis with appropriate parameters
+tabUl!(basis, 2, 1.0)
+```
+
+# Warning
+> Ensure that the tabPrefU and tabPrefD arrays in CB72Basis are correctly sized to avoid runtime errors.
+
 """
 function tabUl!(basis::CB72Basis,
                     l::Int64,r::Float64,
@@ -165,17 +205,17 @@ function tabUl!(basis::CB72Basis,
 
     x   = r/rb        # Dimensionless radius
     xl  = x^(l)
-    ρ = ρCB72(x)  # Value of the rescaled parameter rho
+    ρ = _ρCB72(x)  # Value of the rescaled parameter rho
 
     #####
     # Recurrence on adimensional subpart (xi) of the potential basis elements
     #####
     # Initialization
-    u0, u1 = 0.0, UAzimuthalInitializationCB72(x,l)  # n = -1, 0
+    u0, u1 = 0.0, _UAzimuthalInitializationCB72(x,l)  # n = -1, 0
     tabl[1] =  u1
     # Recurrence loop
     for n=1:nmax # Loop over the radial basis numbers. ATTENTION, index starts at n=0
-        u2 = URadialRecurrenceCB72(u0,u1,ρ,l,n)
+        u2 = _URadialRecurrenceCB72(u0,u1,ρ,l,n)
         tabl[n+1] = u2
         u0, u1 = u1, u2
     end
@@ -203,16 +243,16 @@ function getUln(basis::CB72Basis,
     tabPrefU    = basis.tabPrefU
 
     x   = r/rb        # Dimensionless radius
-    ρ   = ρCB72(x)  # Value of the rescaled parameter rho
+    ρ   = _ρCB72(x)  # Value of the rescaled parameter rho
 
     #####
     # Recurrence on adimensional subpart (xi) of the potential basis elements
     #####
     # Initialization
-    uprev, uact = 0.0, UAzimuthalInitializationCB72(x,l)  # n = -1, 0
+    uprev, uact = 0.0, _UAzimuthalInitializationCB72(x,l)  # n = -1, 0
     # Recurrence loop
     for np=1:n # Loop over the radial basis numbers. ATTENTION, index starts at n=0
-        unext = URadialRecurrenceCB72(uprev,uact,ρ,l,np)
+        unext = _URadialRecurrenceCB72(uprev,uact,ρ,l,np)
         uprev, uact = uact, unext
     end
 

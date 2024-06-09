@@ -8,14 +8,29 @@ data_path_hernquist() = abspath(joinpath(@__DIR__, "tables", "data_HO92_lmax_50_
 
 
 """
-    HernquistBasis
+HernquistBasis <: SphericalBasis
 
-Radial basis elements from Hernquist & Ostriker (1992)
+A structure for interfacing with the radial basis elements from Hernquist & Ostriker (1992).
+
+# Fields
+- `name::String`: Basis name (default Hernquist).
+- `lmax::Int64`: Maximal harmonic/azimuthal index (starts at 0).
+- `nradial::Int64`: Number of radial basis elements (≥ 1).
+- `G::Float64`: Gravitational constant (default 1.0).
+- `rb::Float64`: Radial extension (default 1.0).
+- `tabPrefU::Array{Float64,2}`: Potential prefactors array.
+- `tabPrefD::Array{Float64,2}`: Density prefactors array.
+- `tabUl::Array{Float64,1}`: Potential elements value array.
+- `tabDl::Array{Float64,1}`: Density elements value array.
+
+# Description
+The `HernquistBasis` structure is used to access the radial basis elements as defined
+by Hernquist & Ostriker (1992).
+
 """
-struct HernquistBasis <: AbstractAstroBasis
+struct HernquistBasis <: SphericalBasis
 
     name::String         # Basis name (default Hernquist)
-    dimension::Int64     # Basis dimension (default 2)
 
     lmax::Int64         # Maximal harmonic/azimuthal index (starts at 0)
     nradial::Int64      # Number of radial basis elements (≥ 1)
@@ -33,17 +48,40 @@ end
 
 
 """
-    HernquistBasis([name, dimension, lmax, nmax, G, rb, filename])
+HernquistBasis([name, dimension, lmax, nmax, G, rb, filename])
 
-creates a HernquistBasis structure (and fill prefactors)
+Create a HernquistBasis structure and fill prefactors.
+
+# Arguments
+- `name::String="Hernquist"`: Basis name.
+- `lmax::Int64=0`: Maximal harmonic/azimuthal index (starts at 0).
+- `nradial::Int64=1`: Number of radial basis elements (≥ 1).
+- `G::Float64=1.0`: Gravitational constant.
+- `rb::Float64=1.0`: Radial extension.
+- `filename::String=data_path_hernquist()`: File path to Hernquist prefactors data.
+
+# Description
+The `HernquistBasis` constructor function creates a new instance of the `HernquistBasis` structure.
+It initializes the basis with provided parameters and fills the potential and density prefactor arrays
+by reading from a file specified by `filename`.
+
+# Example
+```julia
+# Creating a HernquistBasis with default parameters
+hernquist_basis = HernquistBasis()
+
+# Creating a HernquistBasis with custom parameters
+custom_basis = HernquistBasis(name="CustomBasis", lmax=10, nradial=5, G=2.0, rb=2.0)
+```
+
 """
-function HernquistBasis(;name::String="Hernquist", dimension::Int64=3,
+function HernquistBasis(;name::String="Hernquist",
                          lmax::Int64=0, nradial::Int64=1,
                          G::Float64=1., rb::Float64=1.,
                          filename::String=data_path_hernquist())
 
     tabPrefU, tabPrefD = ReadFillHernquistPrefactors(lmax,nradial,rb,G,filename)
-    basis = HernquistBasis(name,dimension,
+    basis = HernquistBasis(name,
                            lmax,nradial,
                            G,rb,
                            tabPrefU,tabPrefD, # Prefactors arrays

@@ -18,14 +18,54 @@ using SpecialFunctions
 using Memoize
 
 """
-    K76Basis
+K76Basis <: RazorThinBasis
 
-Radial basis elements from Kalnajs (1976)
+A structure for interfacing with the radial basis elements of Kalnajs (1976).
+
+# Fields
+- `name::String`: Basis name (default K76).
+- `lmax::Int64`: Maximal harmonic/azimuthal index (starts at 0).
+- `nradial::Int64`: Number of radial basis elements (≥ 1).
+- `G::Float64`: Gravitational constant (default 1.0).
+- `rb::Float64`: Radial extension (default 1.0).
+- `kKA::Int64`: Basis index specific to Kalnajs (1976).
+- `tabPrefU::Array{Float64,2}`: Potential prefactors array.
+- `tabPrefD::Array{Float64,2}`: Density prefactors array.
+- `tabUl::Array{Float64,1}`: Potential elements value array.
+- `tabDl::Array{Float64,1}`: Density elements value array.
+
+# Description
+The `K76Basis` structure is used to access the radial basis elements as defined
+by Kalnajs (1976). 
+
+# Example
+```julia
+using Random
+
+# Creating an instance of K76Basis
+k76 = K76Basis(
+    "K76",       # name
+    10,          # lmax
+    5,           # nradial
+    1.0,         # G
+    1.0,         # rb
+    2,           # kKA
+    rand(10, 5), # tabPrefU
+    rand(10, 5), # tabPrefD
+    rand(5),     # tabUl
+    rand(5)      # tabDl
+)
+
+# Accessing fields
+println(k76.name)
+println(k76.lmax)
+println(k76.kKA)
+```
+
 """
-struct K76Basis <: AbstractAstroBasis
+struct K76Basis <: RazorThinBasis
 
     name::String        # Basis name (default K76)
-    dimension::Int64     # Basis dimension (default 2)
 
     lmax::Int64         # Maximal harmonic/azimuthal index (starts at 0)
     nradial::Int64      # Number of radial basis elements (≥ 1)
@@ -48,11 +88,11 @@ end
 
 creates a K76Basis structure
 """
-function K76Basis(;name::String="K76", dimension::Int64=2,
+function K76Basis(;name::String="K76",
                    lmax::Int64=0, nradial::Int64=1,
                    G::Float64=1., rb::Float64=1., kKA::Int64=1)
 
-    basis = K76Basis(name,dimension,
+    basis = K76Basis(name,
                      lmax,nradial,
                      G,rb,kKA,
                      zeros(Float64,lmax+1,nradial),zeros(Float64,lmax+1,nradial), # Prefactors arrays

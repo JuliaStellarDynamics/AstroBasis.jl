@@ -6,6 +6,8 @@ using Documenter, AstroBasis
 makedocs(sitename = "AstroBasis.jl",
          pages=[
                 "Home" => "index.md",
+                "Quickstart" => "quickstart.md",
+                "Common Interface" => "common.md",
                 "Bases" => "bases.md"
                ],
          format = Documenter.HTML(prettyurls=false))

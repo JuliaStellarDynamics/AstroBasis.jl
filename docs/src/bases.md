@@ -8,6 +8,11 @@
 AstroBasis.CB73Basis
 ```
 
+### Hernquist (1992)
+```@docs
+AstroBasis.HernquistBasis
+```
+
 
 ## Razor-thin bases
 

@@ -8,10 +8,9 @@
 
 Radial basis elements derived by SLE solution, pre-tabulated
 """
-struct EXPeofBasis_type <: AbstractAstroBasis
+struct EXPeofBasis_type <: SphericalBasis
 
     name::String         # Basis name (default CB73)
-    dimension::Int64     # Basis dimension (default 2)
 
     lmax::Int64         # Maximal harmonic/azimuthal index (starts at 0)
     nradial::Int64      # Number of radial basis elements (≥ 1)
@@ -29,11 +28,31 @@ end
 
 
 
-#isocache = "/Volumes/External1/Isochrone/.slgrid_sph_isochrone"
-
 # set the data path for the basis prefactor elements
 data_path() = abspath(joinpath(@__DIR__, "tables", "slgrid_sph_isochrone"))
 # rename for isochrone specifically
+
+
+"""
+    EmpiricalIsochrone([name, dimension, lmax, nmax, G, rb, filename])
+
+creates an Isochrone basis structure derived from a Sturm-Liouville solution (and fill prefactors)
+"""
+function HernquistBasis(;name::String="Hernquist",
+                         lmax::Int64=0, nradial::Int64=1,
+                         G::Float64=1., rb::Float64=1.,
+                         filename::String=data_path_hernquist())
+
+    tabPrefU, tabPrefD = ReadFillHernquistPrefactors(lmax,nradial,rb,G,filename)
+    basis = HernquistBasis(name,
+                           lmax,nradial,
+                           G,rb,
+                           tabPrefU,tabPrefD, # Prefactors arrays
+                           zeros(Int64,nradial),zeros(Float64,nradial)) # Elements value arrays
+
+    return basis
+end
+
 
 ##################################################
 function iso_potential(r::Float64)
