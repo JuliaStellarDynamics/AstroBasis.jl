@@ -55,4 +55,4 @@ savefig(plU,"CluttonBrock73.png")
 println("The plot has been saved in the same folder as this example script under the name 'CluttonBrock73.png'.")
 ```
 
-![`Clutton-Brock (1973)`](../assets/CluttonBrock73_original.png)
+![`Clutton-Brock (1973)`](assets/CluttonBrock73_original.png)
