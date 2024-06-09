@@ -1,7 +1,12 @@
 
 # AstroBasis.jl
 
-[![image](https://github.com/JuliaStellarDynamics/AstroBasis.jl/actions/workflows/documentation.yml/badge.svg?branch=documentation)](https://juliastellardynamics.github.io/AstroBasis.jl/)
+[![image](https://github.com/JuliaStellarDynamics/AstroBasis.jl/actions/workflows/documentation.yml/badge.svg?branch=main)](https://juliastellardynamics.github.io/AstroBasis.jl/)
+[![codecov](https://codecov.io/github/JuliaStellarDynamics/AstroBasis.jl/branch/main/graph/badge.svg?branch=main)](https://codecov.io/github/JuliaStellarDynamics/AstroBasis.jl?branch=main)
+[![image](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliastellardynamics.github.io/AstroBasis.jl/dev/)
+[![image](https://github.com/JuliaStellarDynamics/AstroBasis.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JuliaStellarDynamics/AstroBasis.jl/actions/workflows/CI.yml)
+[![image](https://img.shields.io/badge/julia-stable-blue)](https://github.com/JuliaStellarDynamics/AstroBasis.jl/actions/workflows/CI.yml)
+[![image](http://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/JuliaStellarDynamics/AstroBasis.jl/blob/LICENSE)
 
 `AstroBasis` is a package written in Julia to compute basis function evaluations, primarily for astronomical models.
 
