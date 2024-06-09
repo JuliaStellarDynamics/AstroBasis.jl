@@ -12,4 +12,4 @@ makedocs(sitename = "AstroBasis.jl",
                ],
          format = Documenter.HTML(prettyurls=false))
 
-deploydocs(repo="github.com/JuliaStellarDynamics/AstroBasis.jl",devbranch="documentation")
+deploydocs(repo="github.com/JuliaStellarDynamics/AstroBasis.jl",devbranch="main")
