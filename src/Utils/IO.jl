@@ -87,3 +87,6 @@ function getparameters(basis::AB) where {AB <: AbstractAstroBasis}
     # Return the dictionary of parameters
     return paramsdict
 end
+
+# for backward compatibility
+GetParameters = getparameters

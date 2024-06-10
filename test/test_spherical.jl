@@ -9,6 +9,8 @@ ltest, nradial = 2, 5
         basis = AstroBasis.CB73Basis(lmax=ltest,nradial=nradial,G=G, rb=rb)
         @test dimension(basis) == 3
         @test getparameters(basis)["name"] == "CB73"
+        # backward compatibility check
+        @test AstroBasis.GetParameters(basis)["name"] == "CB73"
         @test getDln(basis,ltest,nradial-1,rb) ≈ 1.6230683210206467 atol=1e-6
         @test getUln(basis,ltest,nradial-1,rb) ≈ -0.418381088294792 atol=1e-6
         tabUl!(basis,0,rb)
