@@ -19,7 +19,7 @@
 
 ### Clutton-Brock (1973)
 ```@docs
-AstroBasis.CB73Basis
+CB73Basis
 ```
 
 ### Hernquist (1992)

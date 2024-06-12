@@ -9,3 +9,6 @@
 
 # Documentation (avoid committing generated content)
 docs/build/
+
+# Bases not yet ready for primetime
+src/EXPeof.jl

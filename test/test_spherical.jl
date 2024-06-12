@@ -6,6 +6,10 @@ ltest, nradial = 2, 5
 
 @testset "sphericalbases" begin
     @testset "CB73" begin
+        # build bases with unique cases
+        basis = AstroBasis.CB73Basis(lmax=ltest,nradial=1,G=G, rb=rb)
+        basis = AstroBasis.CB73Basis(lmax=ltest,nradial=2,G=G, rb=rb)
+        # build a standard basis
         basis = AstroBasis.CB73Basis(lmax=ltest,nradial=nradial,G=G, rb=rb)
         @test dimension(basis) == 3
         @test getparameters(basis)["name"] == "CB73"
@@ -17,6 +21,8 @@ ltest, nradial = 2, 5
         @test basis.tabUl[2] == 0
         tabDl!(basis,0,rb)
         @test basis.tabDl[2] == 0
+        # test the basis writing (for coverage!)
+        AstroBasis.WriteParameters("tmp.h5",basis,"w")
     end
     @testset "Hernquist" begin
         basis = AstroBasis.HernquistBasis(lmax=ltest,nradial=nradial,G=G, rb=rb)
