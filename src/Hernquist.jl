@@ -134,12 +134,12 @@ end
 
 
 
-"""ClnHernquist(α,n,rho)
+"""_ClnHernquist(α,n,rho)
 Definition of the Gegenbauer polynomials
 These coefficients are computed through an upward recurrence
 @IMPROVE compute all the basis elements (n)_{1<=n<=nmax} at once
 """
-function ClnHernquist(α::Float64,n::Int64,xi::Float64)
+function _ClnHernquist(α::Float64,n::Int64,xi::Float64)
 
     v0 = 1.0 # Initial value for n=0
     if (n == 0)
@@ -173,7 +173,7 @@ function UlnpHernquist(l::Int64,np::Int64,r::Float64,tabPrefHernquist_Ulnp::Matr
     x    = r/rb                                    # Dimensionless radius
     rho  = rhoHernquist(x)                              # Value of the rescaled parameter rho
     valR = ((x/(1.0+x^(2)))^(l))/(sqrt(1.0+x^(2))) # Value of the multipole factor
-    valC = ClnHernquist(l+1.0,np,rho)                 # Value of the Gegenbauer polynomials
+    valC = _ClnHernquist(l+1.0,np,rho)                 # Value of the Gegenbauer polynomials
     res  = pref*valR*valC                          # Value of the radial function
     return res
 end
@@ -193,7 +193,7 @@ function DlnpHernquist(l::Int64,np::Int64,r::Float64,tabPrefHernquist_Dlnp::Matr
     x    = r/rb                                      # Dimensionless radius
     rho  = rhoHernquist(x)                                # Value of the rescaled parameter rho
     valR = ((x/(1.0+x^(2)))^(l))/((1.0+x^(2))^(5/2)) # Value of the multipole factor
-    valC = ClnHernquist(l+1.0,np,rho)                   # Value of the Gegenbauer polynomials
+    valC = _ClnHernquist(l+1.0,np,rho)                   # Value of the Gegenbauer polynomials
     res  = pref*valR*valC
     return res
 end

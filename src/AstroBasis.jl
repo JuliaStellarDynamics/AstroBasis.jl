@@ -27,9 +27,11 @@ export getUln,getDln,tabUl!,tabDl!
 
 # bring in the Clutton-Brock (1973) spherical basis
 include("CB73.jl")
+export CB73Basis
 
 # bring in the Hernquist & Ostriker (1992) disc basis
 include("Hernquist.jl")
+export HernquistBasis
 
 # @IMPROVE, add Bessel basis
 
@@ -37,9 +39,11 @@ include("Hernquist.jl")
 
 # bring in the Clutton-Brock (1972) disc basis
 include("CB72.jl")
+export CB72Basis
 
 # bring in the Kalnajs (1976) disc basis
 include("Kalnajs76.jl")
+export K76Basis
 
 
 end # module
